@@ -69,6 +69,14 @@ namespace LearnixCRM.Application.Services
                 ?? throw new KeyNotFoundException("User not found");
 
             var hash = BCrypt.Net.BCrypt.HashPassword(password);
+            if(user.Status == UserStatus.Pending)
+            {
+                throw new InvalidOperationException("Cannot activate the User");
+            }
+            if(user.Status == UserStatus.Active)
+            {
+                throw new InvalidOperationException("User is already Active");
+            }
 
             user.Activate(hash, adminName);
 
@@ -90,9 +98,16 @@ namespace LearnixCRM.Application.Services
                 ?? throw new KeyNotFoundException("User not found");
 
             var role = Enum.Parse<UserRole>(newRole, true);
+
+            if(role == UserRole.Admin)
+            {
+                throw new InvalidOperationException("Invalid User role");
+            }
             user.ChangeRole(role, adminName);
 
             await _repository.UpdateUserAsync(user);
+
+
         }
         public async Task ResendInviteAsync(int userId, string adminName)
         {
