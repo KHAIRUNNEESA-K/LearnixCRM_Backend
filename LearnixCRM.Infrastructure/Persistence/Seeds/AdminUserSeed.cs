@@ -18,8 +18,7 @@ namespace LearnixCRM.Infrastructure.Persistence.Seed
 
             admin.Activate(
                 passwordHash: passwordHash,
-                updatedBy: "SYSTEM"
-            );
+                updatedBy: "SYSTEM");
             return admin;
         }
     }

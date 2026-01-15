@@ -101,11 +101,7 @@ namespace LearnixCRM.Infrastructure.Repositories
         {
             return await _db.QueryAsync<UserInvite>(
                 "sp_GetPendingInvites",
-                commandType: CommandType.StoredProcedure
-            );
+                commandType: CommandType.StoredProcedure);
         }
-
-
     }
-
 }
