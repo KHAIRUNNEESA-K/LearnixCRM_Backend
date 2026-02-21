@@ -9,9 +9,11 @@ namespace LearnixCRM.Infrastructure.Persistence
     {
         public DbSet<User> Users => Set<User>();
 
-        public DbSet<UserInvite> UserInvites => Set<UserInvite>();
+        public DbSet<UserPasswordToken> UserPasswordTokens => Set<UserPasswordToken>();
 
-        public DbSet<PasswordReset> PasswordResets => Set<PasswordReset>();
+        public DbSet<AssignUsers> AssignUsers => Set<AssignUsers>();
+
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         public LearnixDbContext(DbContextOptions<LearnixDbContext> options)
             : base(options)
@@ -24,30 +26,33 @@ namespace LearnixCRM.Infrastructure.Persistence
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(LearnixDbContext).Assembly);
             modelBuilder.Entity<User>().HasQueryFilter(u => u.DeletedAt == null);
-            modelBuilder.Entity<UserInvite>().HasQueryFilter(x => x.DeletedAt == null);
-            modelBuilder.Entity<PasswordReset>().HasQueryFilter(pr => pr.DeletedAt == null);
-
+            modelBuilder.Entity<UserPasswordToken>().HasQueryFilter(upt => upt.DeletedAt == null);
+            modelBuilder.Entity<AssignUsers>().HasQueryFilter(s => s.DeletedAt == null);
             SeedData(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+            var admin = AdminUserSeed.CreateAdmin();
+
             modelBuilder.Entity<User>().HasData(new
             {
-                UserId = 1, 
-                FullName = "System Administrator",
-                Email = "admin@learnixcrm.com",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
-                UserRole = UserRole.Admin,
-                Status = UserStatus.Active,
+                UserId = 1,
+                FullName = admin.FullName,
+                Email = admin.Email,
+                PasswordHash = admin.PasswordHash,
+                UserRole = admin.UserRole,
+                Status = admin.Status,
+
                 CreatedAt = DateTime.UtcNow,
-                CreatedBy = "SYSTEM",
+                CreatedBy = 1,  
+
                 UpdatedAt = (DateTime?)null,
-                UpdatedBy = (string?)null,
+                UpdatedBy = (int?)null,
+
                 DeletedAt = (DateTime?)null,
-                DeletedBy = (string?)null
+                DeletedBy = (int?)null
             });
         }
-
     }
 }

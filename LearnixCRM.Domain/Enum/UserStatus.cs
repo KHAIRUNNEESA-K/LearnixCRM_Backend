@@ -8,8 +8,11 @@ namespace LearnixCRM.Domain.Enum
 {
     public enum UserStatus
     {
-        Pending ,
-        Active ,
-        Inactive 
+        Inactive = 0,
+        Pending = 1,
+        Approved = 2,
+        Active = 3,
+        Rejected = 4,
+        Blocked=5
     }
 }

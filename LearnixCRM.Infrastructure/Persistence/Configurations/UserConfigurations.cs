@@ -14,49 +14,74 @@ namespace LearnixCRM.Infrastructure.Persistence.Configurations
             builder.HasKey(u => u.UserId);
 
             builder.Property(u => u.UserId)
-                 .ValueGeneratedOnAdd();
+                   .ValueGeneratedOnAdd();
 
             builder.Property(u => u.FullName)
-                .HasMaxLength(200);
+                   .IsRequired()
+                   .HasMaxLength(200);
 
             builder.Property(u => u.Email)
-                .IsRequired()
-                .HasMaxLength(200);
+                   .IsRequired()
+                   .HasMaxLength(200);
 
             builder.HasIndex(u => u.Email)
-                .IsUnique();
+                   .IsUnique();
 
             builder.Property(u => u.PasswordHash)
                    .HasMaxLength(500)
                    .IsRequired(false);
 
             builder.Property(u => u.UserRole)
-                   .HasConversion<string>()
+                   .HasConversion<int>()
                    .IsRequired();
 
             builder.Property(u => u.Status)
-                   .HasConversion<string>()
+                   .HasConversion<int>()
                    .IsRequired();
 
+            builder.HasIndex(u => u.Status);
+
+            builder.Property(u => u.RejectReason)
+                   .HasMaxLength(500);
+
+            builder.Property(u => u.EmployeeCode)
+                   .HasMaxLength(20);
+
+            builder.HasIndex(u => u.EmployeeCode)
+                   .IsUnique()
+                   .HasFilter("[EmployeeCode] IS NOT NULL");
+
+            builder.Property(u => u.DateOfJoining);
+
+            builder.Property(u => u.ContactNumber)
+                   .HasMaxLength(20);
+
+            builder.HasIndex(u => u.ContactNumber)
+                   .IsUnique()
+                   .HasFilter("[ContactNumber] IS NOT NULL");
+
+            builder.Property(u => u.ProfileImageUrl)
+                   .HasMaxLength(500);
+
+            builder.Property(u => u.ProfileImagePublicId)
+                   .HasMaxLength(200);
 
             builder.Property(u => u.CreatedAt)
-                .IsRequired();
+                   .IsRequired();
 
             builder.Property(u => u.CreatedBy)
-                .HasMaxLength(100);
+                   .IsRequired();
 
             builder.Property(u => u.UpdatedAt);
 
-            builder.Property(u => u.UpdatedBy)
-                .HasMaxLength(100);
+            builder.Property(u => u.UpdatedBy);
 
             builder.Property(u => u.DeletedAt);
 
-            builder.Property(u => u.DeletedBy)
-                .HasMaxLength(100);
+            builder.Property(u => u.DeletedBy);
+
 
             builder.HasQueryFilter(u => u.DeletedAt == null);
-
         }
     }
 }

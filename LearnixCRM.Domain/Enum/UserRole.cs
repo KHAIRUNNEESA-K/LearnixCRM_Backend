@@ -8,8 +8,8 @@ namespace LearnixCRM.Domain.Enum
 {
     public enum UserRole
     {
-        Admin ,
-        Manager ,
-        Sales
+        Admin = 1,
+        Manager = 2 ,
+        Sales = 3
     }
 }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using LearnixCRM.Application.DTOs;
+using LearnixCRM.Application.DTOs.User;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Domain.Enum;
 using System;
@@ -15,11 +15,10 @@ namespace LearnixCRM.Application.Mapping
         public UserMappingProfile()
         {
             CreateMap<User, UserResponseDto>()
-                .ForMember(dest => dest.Role,
-                    opt => opt.MapFrom(src => src.UserRole.ToString()))
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => src.Status.ToString()));
-            CreateMap<UserInvite, UserInviteDto>();
+                    .ForMember(dest => dest.Role,
+                         opt => opt.MapFrom(src => (int)src.UserRole))
+                    .ForMember(dest => dest.Status,
+                         opt => opt.MapFrom(src => (int)src.Status));
 
         }
     }

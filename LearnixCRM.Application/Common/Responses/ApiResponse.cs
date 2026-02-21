@@ -8,7 +8,7 @@ namespace LearnixCRM.Application.Common.Responses
 {
     public class ApiResponse<T>
     {
-        public bool Success { get; set; }
+        public bool IsSuccess { get; set; }
         public string Message { get; set; } = string.Empty;
         public int StatusCode { get; set; }
         public T? Data { get; set; }
@@ -16,7 +16,7 @@ namespace LearnixCRM.Application.Common.Responses
         {
             return new ApiResponse<T>
             {
-                Success = true,
+                IsSuccess = true,
                 Message = message,
                 StatusCode = statusCode,
                 Data = data
@@ -28,7 +28,7 @@ namespace LearnixCRM.Application.Common.Responses
         {
             return new ApiResponse<T>
             {
-                Success = false,
+                IsSuccess = false,
                 Message = message,
                 StatusCode = statusCode,
                 Data = default

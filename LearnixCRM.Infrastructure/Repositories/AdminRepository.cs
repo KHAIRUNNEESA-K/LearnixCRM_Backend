@@ -1,5 +1,5 @@
 ﻿using Dapper;
-using LearnixCRM.Application.Interfaces;
+using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Domain.Enum;
 using LearnixCRM.Infrastructure.Persistence;
@@ -19,41 +19,66 @@ namespace LearnixCRM.Infrastructure.Repositories
             _db = db;
         }
 
+
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-           return await _db.QueryAsync<User>("sp_GetAllUsers",commandType: CommandType.StoredProcedure);
+            return await _db.QueryAsync<User>(
+                "sp_GetAllUsers",
+                commandType: CommandType.StoredProcedure);
         }
+        public async Task<IEnumerable<User>> GetActiveUsersAsync()
+        {
+            return await _db.QueryAsync<User>(
+                "sp_GetActiveUsers",
+                commandType: CommandType.StoredProcedure);
+        }
+
 
         public async Task<IEnumerable<User>> GetPendingUsersAsync()
         {
-            return await _db.QueryAsync<User>("sp_GetPendingUsers",commandType: CommandType.StoredProcedure);
+            return await _db.QueryAsync<User>(
+                "sp_GetPendingUsers",
+                commandType: CommandType.StoredProcedure);
         }
-
-        public async Task<User> CreateUserAsync(User user)
+        public async Task<IEnumerable<User>> GetInactiveUserAsync()
         {
-            _context.Users.Add(user);
-
-            try
-            {
-
-                await _context.SaveChangesAsync();
-                return user;
-            }
-            catch (DbUpdateException ex)
-            {
-
-                var innerMessage = ex.InnerException?.Message;
-                Console.WriteLine("Database error: " + innerMessage);
-
-                throw new Exception("Unable to save user. " + innerMessage);
-            }
+            return await _db.QueryAsync<User>(
+                "sp_GetInactiveUsers",
+                commandType: CommandType.StoredProcedure);
         }
-
-        public async Task<User?> GetByIdAsync(int userId)
+            
+        public async Task<IEnumerable<User>> GetBlockedUserAsync()
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == userId);
+            return await _db.QueryAsync<User>(
+                "sp_GetBlockedUsers",
+                commandType: CommandType.StoredProcedure);
         }
+        public async Task<IEnumerable<User>> GetRejectedUserAsync()
+        {
+            return await _db.QueryAsync<User>(
+                "sp_GetRejectedUsers",
+                commandType: CommandType.StoredProcedure);
+        }
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@UserId", userId, DbType.Int32);
+
+            var user = await _db.QueryFirstOrDefaultAsync<User>(
+                "sp_GetUserById",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+
+            return user;
+        }
+        public async Task<User?> GetActiveUserByIdAsync(int userId)
+        {
+            return await _db.QueryFirstOrDefaultAsync<User>(
+                "sp_GetActiveUserById",
+                new { UserId = userId },
+                commandType: CommandType.StoredProcedure);
+        }
+
 
         public async Task UpdateUserAsync(User user)
         {
@@ -61,49 +86,39 @@ namespace LearnixCRM.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task CreateInviteAsync(UserInvite invite)
-        {
-            _context.UserInvites.Add(invite);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<UserInvite?> GetInviteByEmailAsync(string email)
-            => await _context.UserInvites
-                .FirstOrDefaultAsync(x => x.Email == email);
-
-        public async Task SaveInviteAsync(UserInvite invite)
-        {
-            _context.UserInvites.Update(invite);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task DeleteUserAsync(int userId, string deletedBy)
+        public async Task DeleteUserAsync(int userId, int deletedBy)
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.UserId == userId);
-
-            if (user == null)
-            {
-                throw new Exception("User not found");
-            }
-
-            if (user.UserRole == UserRole.Admin)
-            {
-                throw new Exception("Admin user cannot be deleted");
-            }
+                .FirstOrDefaultAsync(u => u.UserId == userId && u.DeletedAt == null);
 
             user.Delete(deletedBy);
-
             await _context.SaveChangesAsync();
         }
-
-        public async Task<IEnumerable<UserInvite>> GetPendingInvitesAsync()
+        public async Task<IEnumerable<User>> GetUsersByRoleAndStatusAsync(UserRole role, UserStatus status)
         {
-            return await _db.QueryAsync<UserInvite>(
-                "sp_GetPendingInvites",
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@Role", (int)role);
+            parameters.Add("@Status", (int)status);
+
+            return await _db.QueryAsync<User>(
+                "sp_GetUsersByRoleAndStatus",
+                parameters,
+                commandType: CommandType.StoredProcedure);
+        }
+
+        public async Task<IEnumerable<User>> GetApprovedUsersPendingPasswordAsync()
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@Status", (int)UserStatus.Approved);
+
+            return await _db.QueryAsync<User>(
+                "sp_GetUsersByStatusAndPasswordState",
+                parameters,
                 commandType: CommandType.StoredProcedure
             );
         }
+
 
 
     }

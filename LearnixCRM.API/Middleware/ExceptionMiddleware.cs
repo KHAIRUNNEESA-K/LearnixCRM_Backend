@@ -48,10 +48,7 @@ namespace LearnixCRM.API.Middleware
             }
         }
 
-        private async Task HandleException(
-    HttpContext context,
-    Exception exception,
-    HttpStatusCode statusCode)
+        private async Task HandleException( HttpContext context,Exception exception,HttpStatusCode statusCode)
         {
             _logger.LogError(exception, exception.Message);
 
@@ -60,7 +57,7 @@ namespace LearnixCRM.API.Middleware
 
             var response = new ApiResponse<object>
             {
-                Success = false,
+                IsSuccess = false,
                 Message = exception.Message,
                 StatusCode = (int)statusCode,
                 Data = null
