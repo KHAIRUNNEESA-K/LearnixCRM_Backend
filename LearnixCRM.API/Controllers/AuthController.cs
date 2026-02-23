@@ -25,7 +25,6 @@ public class AuthController : ControllerBase
             SetRefreshTokenCookie(result.RefreshToken);
         }
 
-
         result.RefreshToken = null;
 
         var response = ApiResponse<LoginResponseDto>.SuccessResponse(
@@ -53,7 +52,6 @@ public class AuthController : ControllerBase
             "Logout successful"
         ));
     }
-
 
     private void SetRefreshTokenCookie(string refreshToken)
     {

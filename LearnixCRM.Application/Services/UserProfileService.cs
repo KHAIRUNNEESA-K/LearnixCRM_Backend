@@ -92,6 +92,5 @@ namespace LearnixCRM.Application.Services
             return _mapper.Map<UserProfileDto>(user);
         }
 
-
     }
 }

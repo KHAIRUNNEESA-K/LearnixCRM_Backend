@@ -2,14 +2,10 @@
 using LearnixCRM.Application.DTOs.User;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
-using LearnixCRM.Infrastructure.Persistence;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace LearnixCRM.Infrastructure.Repositories
 {
@@ -95,9 +91,5 @@ namespace LearnixCRM.Infrastructure.Repositories
                             x.IsActive)
                 .ToListAsync();
         }
-
-
-
     }
 }
-

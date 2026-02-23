@@ -3,14 +3,17 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using LearnixCRM.API.Middleware;
 using LearnixCRM.Application.Auth.Services;
+using LearnixCRM.Application.Interfaces;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Application.Interfaces.Services;
 using LearnixCRM.Application.Mapping;
+using LearnixCRM.Application.MappingProfiles;
+using LearnixCRM.Application.Mappings;
 using LearnixCRM.Application.Services;
 using LearnixCRM.Application.Validators;
 using LearnixCRM.Infrastructure.Configuration;
 using LearnixCRM.Infrastructure.ExternalServices;
-using LearnixCRM.Infrastructure.Persistence;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using LearnixCRM.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
@@ -18,7 +21,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Data;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -87,33 +89,48 @@ builder.Services.AddAutoMapper(typeof(UserMappingProfile));
 builder.Services.AddAutoMapper(typeof(SetPasswordMappingProfile));
 builder.Services.AddAutoMapper(typeof(UserProfileMapping));
 builder.Services.AddAutoMapper(typeof(RegisterUserMappingProfile));
+builder.Services.AddAutoMapper(typeof(LeadMappingProfile));
+builder.Services.AddAutoMapper(typeof(FollowUpMappingProfile));
+builder.Services.AddAutoMapper(typeof(BlacklistMappingProfile));
 
+// ===== Repositories =====
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
-builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISetPasswordRepository, SetPasswordRepository>();
-builder.Services.AddScoped<ISetPasswordService, SetPasswordService>();
-builder.Services.AddScoped<IResetPasswordService, ResetPasswordService>();
 builder.Services.AddScoped<IAssignUsersRepository, AssignUsersRepository>();
-builder.Services.AddScoped<IAssignUsersService, AssignUsersService>();
 builder.Services.AddScoped<IAssignedSalesRepository, AssignedSalesRepository>();
-builder.Services.AddScoped<IAssignedSalesService, AssignedSalesService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<ISalesLeadRepository, SalesLeadRepository>();
+builder.Services.AddScoped<ISalesFollowUpRepository,SalesFollowUpRepository>();
+builder.Services.AddScoped<IBlacklistRepository, BlacklistRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
-builder.Services.AddHostedService<TokenCleanupService>();
-
-
+// ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, AuthTokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<ISetPasswordRepository, SetPasswordRepository>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ISetPasswordService, SetPasswordService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<IResetPasswordService, ResetPasswordService>();
+builder.Services.AddScoped<IAssignUsersService, AssignUsersService>();
+builder.Services.AddScoped<IAssignedSalesService, AssignedSalesService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<ISalesLeadService, SalesLeadService>();
+builder.Services.AddScoped<ISalesFollowUpService,SalesFollowUpService>();
+builder.Services.AddScoped<IBlacklistService, BlacklistService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+
+// ===== Hosted Services =====
+builder.Services.AddHostedService<TokenCleanupService>();
+
+
+
 builder.Services.Configure<SendGridSettings>(
     builder.Configuration.GetSection("SendGrid")
 );
@@ -178,8 +195,6 @@ builder.Services.Configure<CloudinarySettings>(options =>
 });
 
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
-
 
 var app = builder.Build();
 

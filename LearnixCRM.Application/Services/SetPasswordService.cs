@@ -81,7 +81,5 @@ namespace LearnixCRM.Application.Services
             return token;
         }
 
-        
-
     }
 }

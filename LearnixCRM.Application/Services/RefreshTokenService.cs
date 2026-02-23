@@ -52,9 +52,6 @@ namespace LearnixCRM.Application.Services
             Console.WriteLine("User Status: " + user?.Status);
 
 
-            //if (user == null || user.Status != UserStatus.Active)
-            //    throw new UnauthorizedAccessException("User not valid");
-
             existingToken.Revoke(user.UserId);
             Console.WriteLine("Token UserId: " + existingToken.UserId);
             await _refreshTokenRepository.UpdateAsync(existingToken);

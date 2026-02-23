@@ -8,7 +8,7 @@ BEGIN
         s.UserId AS SalesUserId,
         s.FullName AS SalesUserName,
         s.Email AS Email,            
-        a.Id AS AssignmentId,
+        a.AssignId AS AssignmentId,
         a.CreatedAt,
         a.CreatedBy
     FROM AssignUsers a

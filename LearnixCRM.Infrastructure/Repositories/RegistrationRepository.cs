@@ -1,13 +1,9 @@
 ﻿using Dapper;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
-using LearnixCRM.Infrastructure.Persistence;
-using System;
-using System.Collections.Generic;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace LearnixCRM.Infrastructure.Repositories
 {

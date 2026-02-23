@@ -1,9 +1,8 @@
 ﻿using LearnixCRM.Domain.Entities;
-using LearnixCRM.Domain.Enum;
 using LearnixCRM.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 
-namespace LearnixCRM.Infrastructure.Persistence
+namespace LearnixCRM.Infrastructure.Persistence.Context
 {
     public class LearnixDbContext : DbContext
     {
@@ -14,6 +13,16 @@ namespace LearnixCRM.Infrastructure.Persistence
         public DbSet<AssignUsers> AssignUsers => Set<AssignUsers>();
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+        public DbSet<Lead> Leads => Set<Lead>();
+
+        public DbSet<LeadHistory> LeadHistories => Set<LeadHistory>();
+
+        public DbSet<FollowUp> FollowUps => Set<FollowUp>();
+
+        public DbSet<Student> Students => Set<Student>();
+
+        public DbSet<Blacklist> Blacklists => Set<Blacklist>();
 
         public LearnixDbContext(DbContextOptions<LearnixDbContext> options)
             : base(options)

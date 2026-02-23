@@ -35,9 +35,9 @@ namespace LearnixCRM.Application.Services
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             var users = await _repository.GetAllUsersAsync();
-            if (users==null)
+            if (!users.Any())
             {
-                throw new Exception("No users Found");
+                throw new KeyNotFoundException("No users Found");
             }
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
@@ -313,9 +313,6 @@ namespace LearnixCRM.Application.Services
                 Status = (int)u.Status
             });
         }
-
-
-
 
     }
 }

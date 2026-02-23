@@ -245,8 +245,6 @@ namespace LearnixCRM.Application.Services
         }
 
     }
-
-
 }
 
 

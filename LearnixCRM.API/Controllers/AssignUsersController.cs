@@ -40,7 +40,6 @@ namespace LearnixCRM.API.Controllers
             }
         }
 
-
         [HttpGet("manager/{managerUserId}/sales")]
         public async Task<IActionResult> GetManagerWithSales(int managerUserId)
         {
@@ -77,7 +76,6 @@ namespace LearnixCRM.API.Controllers
                 .SuccessResponse(team, "Sales user reassigned successfully"));
         }
 
-
         [HttpDelete("assign/{assignId}")]
         public async Task<IActionResult> DeleteAssignment(int assignId)
         {
@@ -87,6 +85,7 @@ namespace LearnixCRM.API.Controllers
 
             return Ok(ApiResponse<object>.SuccessResponse(null, "Assignment deleted successfully"));
         }
+
         [HttpPut("reassign-team")]
         public async Task<IActionResult> ReassignManagerTeam([FromBody] ReassignManagerDto dto)
         {
@@ -98,7 +97,5 @@ namespace LearnixCRM.API.Controllers
                 newTeam,
                 "Manager team reassigned successfully"));
         }
-
-
     }
 }

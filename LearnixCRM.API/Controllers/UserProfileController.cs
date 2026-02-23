@@ -32,7 +32,6 @@ namespace LearnixCRM.API.Controllers
             ));
         }
 
-
         [HttpPatch]
         public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileDto dto)
         {
