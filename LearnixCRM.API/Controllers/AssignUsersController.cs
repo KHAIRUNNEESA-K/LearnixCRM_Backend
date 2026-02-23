@@ -23,8 +23,7 @@ namespace LearnixCRM.API.Controllers
         [HttpPost("assign")]
         public async Task<IActionResult> AssignSalesToManager([FromBody] AssignSalesManagerRequestDto dto)
         {
-            try
-            {
+         
                 var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
                 var result =
                     await _salesManager.AssignSalesToManagerAsync(dto, adminId);
@@ -33,11 +32,7 @@ namespace LearnixCRM.API.Controllers
                     result,
                     "Sales user assigned to manager successfully"
                 ));
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            
         }
 
 

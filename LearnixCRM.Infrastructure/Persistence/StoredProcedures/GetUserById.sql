@@ -5,18 +5,7 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT
-        UserId,
-        FullName,
-        Email,
-        PasswordHash,
-        UserRole,
-        Status,
-        CreatedAt,
-        CreatedBy,
-        UpdatedAt,
-        UpdatedBy,
-        DeletedAt,
-        DeletedBy
+       *
     FROM Users
     WHERE UserId = @UserId
       AND UserRole <> 1

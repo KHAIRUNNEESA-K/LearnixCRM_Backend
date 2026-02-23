@@ -10,6 +10,7 @@ namespace LearnixCRM.Application.Interfaces.Repositories
     public interface IRegistrationRepository
     {
         Task<bool> IsEmailRegisteredAsync(string email);
+        Task<bool> IsContactNumberRegisteredAsync(string contactNumber);
         Task CreateUserAsync(User user);
         Task UpdateAsync(User user);
     }

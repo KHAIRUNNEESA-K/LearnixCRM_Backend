@@ -13,10 +13,13 @@ namespace LearnixCRM.Application.Mapping
     {
         public RegisterUserMappingProfile()
         {
-
             CreateMap<User, RegisterUserResponseDto>()
-                .ForMember(dest => dest.Role, opt => opt.MapFrom(src => (int)src.UserRole))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => (int)src.Status));
+                .ForMember(dest => dest.Role,
+                    opt => opt.MapFrom(src => (int)src.UserRole))
+                .ForMember(dest => dest.Status,
+                    opt => opt.MapFrom(src => (int)src.Status))
+                .ForMember(dest => dest.ContactNumber,
+                    opt => opt.MapFrom(src => src.ContactNumber));
 
         }
     }

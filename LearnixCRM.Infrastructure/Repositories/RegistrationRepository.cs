@@ -2,6 +2,7 @@
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -32,6 +33,12 @@ namespace LearnixCRM.Infrastructure.Repositories
                 commandType: CommandType.StoredProcedure
             );
             return result > 0;
+        }
+        public async Task<bool> IsContactNumberRegisteredAsync(string contactNumber)
+        {
+            return await _dbContext.Users
+                .AnyAsync(u => u.ContactNumber == contactNumber
+                               && u.DeletedAt == null);
         }
 
         public async Task CreateUserAsync(User user)

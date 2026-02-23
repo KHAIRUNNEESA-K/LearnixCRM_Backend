@@ -5,11 +5,7 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT 
-        UserId,
-        FullName,
-        Email,
-        UserRole,
-        Status
+      *
     FROM Users
     WHERE Status = @Status
       AND PasswordHash IS NULL
