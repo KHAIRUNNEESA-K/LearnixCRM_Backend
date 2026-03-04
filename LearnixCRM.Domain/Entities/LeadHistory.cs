@@ -15,7 +15,7 @@ namespace LearnixCRM.Domain.Entities
 
         public string? Phone { get; private set; }
 
-        public CourseType CourseInterested { get; private set; }
+        public int CourseId { get; private set; }
 
         public LeadSource Source { get; private set; }
 
@@ -38,7 +38,7 @@ namespace LearnixCRM.Domain.Entities
             FullName = lead.FullName;
             Email = lead.Email;
             Phone = lead.Phone;
-            CourseInterested = lead.CourseInterested;
+            CourseId = lead.CourseId;
             Source = lead.Source;
             Status = lead.Status;
             AssignedToUserId = lead.AssignedToUserId;

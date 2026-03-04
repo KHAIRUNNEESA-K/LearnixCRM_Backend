@@ -23,6 +23,7 @@ namespace LearnixCRM.Infrastructure.Persistence.Context
         public DbSet<Student> Students => Set<Student>();
 
         public DbSet<Blacklist> Blacklists => Set<Blacklist>();
+        public DbSet<Course> Courses { get; set; }
 
         public LearnixDbContext(DbContextOptions<LearnixDbContext> options)
             : base(options)
@@ -32,7 +33,14 @@ namespace LearnixCRM.Infrastructure.Persistence.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+                        modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Course)
+                .WithMany(c => c.Leads)
+                .HasForeignKey(l => l.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+                        modelBuilder.Entity<Course>()
+                    .Property(c => c.Fee)
+                    .HasPrecision(18, 2);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(LearnixDbContext).Assembly);
             modelBuilder.Entity<User>().HasQueryFilter(u => u.DeletedAt == null);
             modelBuilder.Entity<UserPasswordToken>().HasQueryFilter(upt => upt.DeletedAt == null);

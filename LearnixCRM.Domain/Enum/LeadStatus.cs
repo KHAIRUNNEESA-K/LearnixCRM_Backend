@@ -6,6 +6,6 @@
         Contacted = 2,
         Qualified = 3,
         Converted = 4,
-        Lost = 5
+        Lost = 5 
     }
 }

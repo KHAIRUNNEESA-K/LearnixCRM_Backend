@@ -21,5 +21,7 @@ namespace LearnixCRM.Application.Interfaces
         Task<IEnumerable<Lead>> GetByStatusAsync(LeadStatus status);
         Task AddBlacklistAsync(Blacklist blacklist);
         Task AddStudentAsync(Student student);
+
+        Task<List<string>> GetAllEmailsAsync();
     }
 }

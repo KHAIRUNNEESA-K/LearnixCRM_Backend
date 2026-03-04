@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LearnixCRM.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnixDbContext))]
-    [Migration("20260223070445_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260302090915_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -451,11 +451,11 @@ namespace LearnixCRM.Infrastructure.Migrations
                         new
                         {
                             UserId = 1,
-                            CreatedAt = new DateTime(2026, 2, 23, 7, 4, 44, 810, DateTimeKind.Utc).AddTicks(3932),
+                            CreatedAt = new DateTime(2026, 3, 2, 9, 9, 15, 603, DateTimeKind.Utc).AddTicks(1758),
                             CreatedBy = 1,
                             Email = "admin@learnixcrm.com",
                             FullName = "Administrator",
-                            PasswordHash = "$2a$11$VtptSmXW.rtRhs0mI79f7..Z254F04EsGXJ5UneNZvjkrFW/epYRq",
+                            PasswordHash = "$2a$11$8iS3gilE4Ni9laj8yNnF9Ovj4gSAcbm3T/pQnoALh6Nc8kZJZJBNa",
                             Status = 3,
                             UserRole = 1
                         });

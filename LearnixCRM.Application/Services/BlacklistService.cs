@@ -23,8 +23,6 @@ namespace LearnixCRM.Application.Services
                  throw new KeyNotFoundException("No leads in blacklists.");
             }
             return blacklists;
-
-
         }
 
         public async Task<Blacklist?> GetByIdAsync(int id)

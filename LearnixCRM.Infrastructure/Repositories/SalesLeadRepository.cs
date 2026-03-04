@@ -6,6 +6,7 @@
     using LearnixCRM.Domain.Enum;
     using LearnixCRM.Infrastructure.Persistence.Context;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
     using System.Collections.Generic;
     using System.Data;
     using System.Security.Claims;
@@ -43,11 +44,7 @@
         {
             return await _db.QueryFirstOrDefaultAsync<Lead>(
                 "sp_GetLeadByIdForSalesUser",
-                new
-                {
-                    LeadId = id,
-                    AssignedToUserId = _currentUserId
-                },
+                new{ LeadId = id,AssignedToUserId = _currentUserId},
                 commandType: CommandType.StoredProcedure);
         }
 
@@ -55,14 +52,9 @@
         {
             return await _db.QueryAsync<Lead>(
                 "sp_GetLeadsByStatusForSalesUser",
-                new
-                {
-                    Status = (int)status,
-                    AssignedToUserId = _currentUserId
-                },
+                new{Status = (int)status,AssignedToUserId = _currentUserId},
                 commandType: CommandType.StoredProcedure);
         }
-
 
         public async Task AddAsync(Lead lead)
         {
@@ -87,6 +79,7 @@
 
             await _context.SaveChangesAsync();
         }
+
         public async Task AddBlacklistAsync(Blacklist blacklist)
         {
             await _context.Blacklists.AddAsync(blacklist);
@@ -99,5 +92,11 @@
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<string>> GetAllEmailsAsync()
+        {
+            return await _context.Leads
+                .Select(x => x.Email)
+                .ToListAsync();
+        }
     }
 }

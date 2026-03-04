@@ -14,7 +14,7 @@ public class Student : AuditableEntity
 
     public string? Phone { get; private set; }
 
-    public CourseType Course { get; private set; }
+    public int CourseId { get; private set; }
 
     public DateTime JoinedDate { get; private set; }
 
@@ -28,7 +28,7 @@ public class Student : AuditableEntity
         FullName = lead.FullName;
         Email = lead.Email;
         Phone = lead.Phone;
-        Course = lead.CourseInterested;
+        CourseId = lead.CourseId;
         JoinedDate = joinedDate;
 
         SetCreatedBy(createdBy);

@@ -28,7 +28,7 @@ public class LeadConfiguration : IEntityTypeConfiguration<Lead>
 
         builder.Property(x => x.Source).HasConversion<int>();
 
-        builder.Property(x => x.CourseInterested).HasConversion<int>();
+        
 
         builder.HasMany(x => x.FollowUps)
             .WithOne(x => x.Lead)
@@ -52,6 +52,6 @@ public class LeadConfiguration : IEntityTypeConfiguration<Lead>
 
         builder.HasIndex(x => x.AssignedToUserId);
 
-        builder.HasQueryFilter(x => !x.IsDeleted);
+        builder.HasQueryFilter(x => x.DeletedAt == null);
     }
 }
