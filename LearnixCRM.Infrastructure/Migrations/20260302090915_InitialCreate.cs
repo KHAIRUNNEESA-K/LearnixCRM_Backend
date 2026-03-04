@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace LearnixCRM.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -273,7 +273,7 @@ namespace LearnixCRM.Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "UserId", "ContactNumber", "CreatedAt", "CreatedBy", "DateOfJoining", "DeletedAt", "DeletedBy", "Email", "EmployeeCode", "FullName", "PasswordHash", "ProfileImagePublicId", "ProfileImageUrl", "RejectReason", "Status", "UpdatedAt", "UpdatedBy", "UserRole" },
-                values: new object[] { 1, null, new DateTime(2026, 2, 23, 7, 4, 44, 810, DateTimeKind.Utc).AddTicks(3932), 1, null, null, null, "admin@learnixcrm.com", null, "Administrator", "$2a$11$VtptSmXW.rtRhs0mI79f7..Z254F04EsGXJ5UneNZvjkrFW/epYRq", null, null, null, 3, null, null, 1 });
+                values: new object[] { 1, null, new DateTime(2026, 3, 2, 9, 9, 15, 603, DateTimeKind.Utc).AddTicks(1758), 1, null, null, null, "admin@learnixcrm.com", null, "Administrator", "$2a$11$8iS3gilE4Ni9laj8yNnF9Ovj4gSAcbm3T/pQnoALh6Nc8kZJZJBNa", null, null, null, 3, null, null, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssignUsers_ManagerUserId",

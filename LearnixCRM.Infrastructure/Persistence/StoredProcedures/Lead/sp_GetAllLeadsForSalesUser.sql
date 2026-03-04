@@ -9,7 +9,7 @@ BEGIN
         FullName,
         Email,
         Phone,
-        CourseInterested,
+        CourseId,
         Source,
         Status,
         AssignedToUserId,

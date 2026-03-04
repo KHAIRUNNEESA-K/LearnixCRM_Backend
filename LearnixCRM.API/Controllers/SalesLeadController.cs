@@ -1,4 +1,5 @@
-﻿using LearnixCRM.Application.Common.Responses;
+﻿using LearnixCRM.API.Requests;
+using LearnixCRM.Application.Common.Responses;
 using LearnixCRM.Application.DTOs.Lead;
 using LearnixCRM.Application.Interfaces.Services;
 using LearnixCRM.Application.Services;
@@ -6,6 +7,7 @@ using LearnixCRM.Domain.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+
 
 namespace LearnixCRM.API.Controllers
 {
@@ -15,10 +17,16 @@ namespace LearnixCRM.API.Controllers
     public class SalesLeadController : ControllerBase
     {
         private readonly ISalesLeadService _service;
+        private readonly IExcelTemplateService _excelService;
+        private readonly ILeadImportService _importService;
 
-        public SalesLeadController(ISalesLeadService service)
+
+        public SalesLeadController(ISalesLeadService service, IExcelTemplateService excelService, ILeadImportService importService)
         {
             _service = service;
+            _excelService = excelService;
+            _importService = importService;
+
         }
 
         [HttpGet]
@@ -98,5 +106,42 @@ namespace LearnixCRM.API.Controllers
                 "Lead deleted successfully"
             ));
         }
+
+        [HttpGet("download-template")]
+        public IActionResult DownloadLeadTemplate()
+        {
+            var fileBytes = _excelService.GenerateLeadTemplate();
+
+            return File(
+                fileBytes,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "LeadTemplate.xlsx"
+            );
+        }
+
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadExcel([FromForm] UploadExcelRequest request)
+        {
+            if (request.File == null || request.File.Length == 0)
+            {
+                return BadRequest("File is required");
+            }
+
+            int salesUserId = int.Parse(
+                User.FindFirstValue(ClaimTypes.NameIdentifier)!
+            );
+
+            using var stream = request.File.OpenReadStream();
+
+            var result = await _importService.ImportLeadsAsync(stream, salesUserId);
+
+            return Ok(ApiResponse<LeadImportResultDto>.SuccessResponse(
+               result,
+               "Lead upload successfully"
+           ));
+
+        }
     }
 }
+

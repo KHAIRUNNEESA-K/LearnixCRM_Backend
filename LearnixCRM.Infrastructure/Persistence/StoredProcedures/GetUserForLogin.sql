@@ -15,3 +15,5 @@ BEGIN
     WHERE Email = LOWER(@Email)
       AND DeletedAt IS NULL;
 END
+
+

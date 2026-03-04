@@ -15,8 +15,6 @@ namespace LearnixCRM.Application.Validators.Lead
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Invalid email format");
 
-            RuleFor(x => x.CourseInterested)
-                .IsInEnum().WithMessage("Invalid course type");
 
             RuleFor(x => x.Source)
                 .IsInEnum().WithMessage("Invalid lead source");

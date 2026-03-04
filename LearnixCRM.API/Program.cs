@@ -7,8 +7,6 @@ using LearnixCRM.Application.Interfaces;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Application.Interfaces.Services;
 using LearnixCRM.Application.Mapping;
-using LearnixCRM.Application.MappingProfiles;
-using LearnixCRM.Application.Mappings;
 using LearnixCRM.Application.Services;
 using LearnixCRM.Application.Validators;
 using LearnixCRM.Infrastructure.Configuration;
@@ -24,19 +22,16 @@ using System.Data;
 using System.Text;
 using System.Text.Json.Serialization;
 
-
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
- builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter()
-        );
-    });
-
-
+builder.Services.AddControllers()
+   .AddJsonOptions(options =>
+   {
+       options.JsonSerializerOptions.Converters.Add(
+           new JsonStringEnumConverter()
+       );
+   });
 
 builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddSwaggerGen(c =>
@@ -72,6 +67,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
@@ -85,13 +81,7 @@ builder.Services.AddScoped<IDbConnection>(_ =>
     new SqlConnection(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile));
-builder.Services.AddAutoMapper(typeof(SetPasswordMappingProfile));
-builder.Services.AddAutoMapper(typeof(UserProfileMapping));
-builder.Services.AddAutoMapper(typeof(RegisterUserMappingProfile));
-builder.Services.AddAutoMapper(typeof(LeadMappingProfile));
-builder.Services.AddAutoMapper(typeof(FollowUpMappingProfile));
-builder.Services.AddAutoMapper(typeof(BlacklistMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 
 // ===== Repositories =====
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
@@ -104,9 +94,10 @@ builder.Services.AddScoped<IAssignedSalesRepository, AssignedSalesRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<ISalesLeadRepository, SalesLeadRepository>();
-builder.Services.AddScoped<ISalesFollowUpRepository,SalesFollowUpRepository>();
+builder.Services.AddScoped<ISalesFollowUpRepository, SalesFollowUpRepository>();
 builder.Services.AddScoped<IBlacklistRepository, BlacklistRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
 // ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -122,19 +113,20 @@ builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<ISalesLeadService, SalesLeadService>();
-builder.Services.AddScoped<ISalesFollowUpService,SalesFollowUpService>();
+builder.Services.AddScoped<ISalesFollowUpService, SalesFollowUpService>();
 builder.Services.AddScoped<IBlacklistService, BlacklistService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
+builder.Services.AddScoped<ILeadImportService, LeadImportService>();
+
+builder.Services.AddHttpContextAccessor();
 
 // ===== Hosted Services =====
 builder.Services.AddHostedService<TokenCleanupService>();
 
-
-
 builder.Services.Configure<SendGridSettings>(
     builder.Configuration.GetSection("SendGrid")
 );
-
 
 builder.Services.AddAuthorization(options =>
 {
@@ -150,8 +142,6 @@ builder.Services.AddAuthorization(options =>
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings")
 );
-
-builder.Configuration.AddEnvironmentVariables();
 
 var jwtSettings = builder.Configuration
     .GetSection("JwtSettings")
@@ -193,8 +183,6 @@ builder.Services.Configure<CloudinarySettings>(options =>
     options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")!;
     options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")!;
 });
-
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 var app = builder.Build();
 

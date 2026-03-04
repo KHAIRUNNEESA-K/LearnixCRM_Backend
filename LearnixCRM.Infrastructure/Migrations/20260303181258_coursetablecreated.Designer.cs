@@ -4,6 +4,7 @@ using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LearnixCRM.Infrastructure.Migrations
 {
     [DbContext(typeof(LearnixDbContext))]
-    partial class LearnixDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260303181258_coursetablecreated")]
+    partial class coursetablecreated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -124,11 +127,11 @@ namespace LearnixCRM.Infrastructure.Migrations
 
             modelBuilder.Entity("LearnixCRM.Domain.Entities.Course", b =>
                 {
-                    b.Property<int>("CourseId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -159,7 +162,7 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.Property<int?>("UpdatedBy")
                         .HasColumnType("int");
 
-                    b.HasKey("CourseId");
+                    b.HasKey("Id");
 
                     b.ToTable("Courses");
                 });
@@ -492,11 +495,11 @@ namespace LearnixCRM.Infrastructure.Migrations
                         new
                         {
                             UserId = 1,
-                            CreatedAt = new DateTime(2026, 3, 3, 18, 39, 19, 287, DateTimeKind.Utc).AddTicks(7043),
+                            CreatedAt = new DateTime(2026, 3, 3, 18, 12, 58, 258, DateTimeKind.Utc).AddTicks(1726),
                             CreatedBy = 1,
                             Email = "admin@learnixcrm.com",
                             FullName = "Administrator",
-                            PasswordHash = "$2a$11$bPqBWrRwazYISFN4Z16Jp.cpkzlw1a2pbntFpC0RqyknxqflKlOLO",
+                            PasswordHash = "$2a$11$Ttn7kTgQ19hjnqDo2sSKfubwTaODrY0wPu5lor.fDFHRpii6QSK2q",
                             Status = 3,
                             UserRole = 1
                         });

@@ -58,7 +58,7 @@ namespace LearnixCRM.Application.Services
                 dto.FullName,
                 dto.Email,
                 dto.Phone,
-                dto.CourseInterested,
+                dto.CourseId,
                 dto.Source,
                 salesUserId,
                 salesUserId 
@@ -77,36 +77,48 @@ namespace LearnixCRM.Application.Services
             if (existing == null)
                 throw new KeyNotFoundException($"Lead with ID {dto.LeadId} not found.");
 
-            existing.UpdateLead(
-                dto.FullName,
-                dto.Email,
-                dto.Phone,
-                dto.CourseInterested,
-                dto.Source,
-                salesUserId
-            );
+            if (!string.IsNullOrWhiteSpace(dto.FullName) ||
+                     !string.IsNullOrWhiteSpace(dto.Email) ||
+                     !string.IsNullOrWhiteSpace(dto.Phone) ||
+                     dto.CourseId.HasValue ||
+                     dto.Source.HasValue)
+            {
+                existing.UpdateLead(
+                    dto.FullName ?? existing.FullName,
+                    dto.Email ?? existing.Email,
+                    dto.Phone ?? existing.Phone,
+                    dto.CourseId ?? existing.CourseId,
+                    dto.Source ?? existing.Source,
+                    salesUserId
+                );
+            }
 
- 
+
             if (dto.Status.HasValue)
                 existing.UpdateStatus(dto.Status.Value, salesUserId);
 
             if (!string.IsNullOrWhiteSpace(dto.Remark))
                 existing.UpdateRemark(dto.Remark, salesUserId);
 
-         
+
             if (!string.IsNullOrWhiteSpace(dto.Remark))
             {
-                switch (dto.Remark)
-                {
-                    case LeadRemarks.Blacklist:
-                    case LeadRemarks.Spam:
-                    case LeadRemarks.Invalid:
-                        await MoveLeadToBlacklistAsync(existing, salesUserId);
-                        return null;
+                existing.UpdateRemark(dto.Remark, salesUserId);
 
-                    case LeadRemarks.Converted:
-                        await MoveLeadToStudentAsync(existing, salesUserId);
-                        return null;
+                var remarkText = dto.Remark.ToLower();
+                
+                if (remarkText.Contains(LeadRemarks.Blacklist.ToLower()) ||
+                    remarkText.Contains(LeadRemarks.Spam.ToLower()) ||
+                    remarkText.Contains(LeadRemarks.Invalid.ToLower()))
+                {
+                    await MoveLeadToBlacklistAsync(existing, salesUserId);
+                    return null;
+                }
+
+                if (remarkText.Contains(LeadRemarks.Converted.ToLower()))
+                {
+                    await MoveLeadToStudentAsync(existing, salesUserId);
+                    return null;
                 }
             }
 
@@ -133,7 +145,7 @@ namespace LearnixCRM.Application.Services
                 userId
             );
 
-            await _repository.AddBlacklistAsync(blacklist); // Use repository
+            await _repository.AddBlacklistAsync(blacklist);
             await _repository.DeleteAsync(lead);
         }
 
@@ -145,7 +157,7 @@ namespace LearnixCRM.Application.Services
                 userId
             );
 
-            await _repository.AddStudentAsync(student); // Use repository
+            await _repository.AddStudentAsync(student);
             await _repository.DeleteAsync(lead);
         }
     }

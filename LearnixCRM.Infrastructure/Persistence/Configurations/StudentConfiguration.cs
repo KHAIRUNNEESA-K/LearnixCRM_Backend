@@ -9,7 +9,7 @@ public class StudentConfiguration : IEntityTypeConfiguration<Student>
 
         builder.HasKey(x => x.StudentId);
 
-        builder.Property(x => x.Course)
+        builder.Property(x => x.CourseId)
             .HasConversion<int>();
 
         builder.HasIndex(x => x.LeadId)

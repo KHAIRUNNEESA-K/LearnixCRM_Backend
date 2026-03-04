@@ -5,7 +5,6 @@ BEGIN
     SET NOCOUNT ON;
 
     SELECT COUNT(1)
-    FROM Users
+    FROM dbo.Users
     WHERE Email = @Email;
 END
-

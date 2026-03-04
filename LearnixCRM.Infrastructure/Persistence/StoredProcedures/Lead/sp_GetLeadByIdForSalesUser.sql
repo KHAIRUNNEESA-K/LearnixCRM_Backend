@@ -10,7 +10,7 @@ BEGIN
         FullName,
         Email,
         Phone,
-        CourseInterested,
+        CourseId,
         Source,
         Status,
         AssignedToUserId,
@@ -25,3 +25,4 @@ BEGIN
       AND DeletedAt IS NULL;
 
 END
+

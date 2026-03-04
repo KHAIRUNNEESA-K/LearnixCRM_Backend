@@ -24,3 +24,4 @@ BEGIN
       AND Expiry > GETUTCDATE();
 END
 GO
+

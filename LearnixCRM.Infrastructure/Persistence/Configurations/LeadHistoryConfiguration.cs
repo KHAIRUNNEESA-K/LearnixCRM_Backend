@@ -21,7 +21,7 @@ namespace LearnixCRM.Infrastructure.Persistence.Configurations
                 .HasMaxLength(50)
                 .IsRequired();
 
-            builder.Property(x => x.CourseInterested).HasConversion<int>();
+           
 
             builder.Property(x => x.Source).HasConversion<int>();
 
