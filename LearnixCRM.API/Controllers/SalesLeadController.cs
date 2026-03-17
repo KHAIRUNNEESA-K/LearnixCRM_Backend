@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-
 namespace LearnixCRM.API.Controllers
 {
     [ApiController]
@@ -19,7 +18,6 @@ namespace LearnixCRM.API.Controllers
         private readonly ISalesLeadService _service;
         private readonly IExcelTemplateService _excelService;
         private readonly ILeadImportService _importService;
-
 
         public SalesLeadController(ISalesLeadService service, IExcelTemplateService excelService, ILeadImportService importService)
         {
@@ -124,24 +122,22 @@ namespace LearnixCRM.API.Controllers
         public async Task<IActionResult> UploadExcel([FromForm] UploadExcelRequest request)
         {
             if (request.File == null || request.File.Length == 0)
-            {
                 return BadRequest("File is required");
-            }
 
             int salesUserId = int.Parse(
                 User.FindFirstValue(ClaimTypes.NameIdentifier)!
             );
 
-            using var stream = request.File.OpenReadStream();
+            using var memoryStream = new MemoryStream();
+            await request.File.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
 
-            var result = await _importService.ImportLeadsAsync(stream, salesUserId);
+            var result = await _importService.ImportLeadsAsync(memoryStream, salesUserId);
 
             return Ok(ApiResponse<LeadImportResultDto>.SuccessResponse(
-               result,
-               "Lead upload successfully"
-           ));
-
+                result,
+                "Lead upload successfully"
+            ));
         }
     }
 }
-
