@@ -192,6 +192,11 @@ namespace LearnixCRM.Domain.Entities
             UserRole = role;
             SetUpdated(updatedBy);
         }
+        public void MarkInactive(int updatedBy)
+        {
+            Status = UserStatus.Inactive;
+            SetUpdated(updatedBy);
+        }
 
     }
 }

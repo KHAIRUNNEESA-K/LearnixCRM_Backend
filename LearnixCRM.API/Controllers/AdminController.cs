@@ -61,7 +61,7 @@ namespace LearnixCRM.API.Controllers
         {
             var users = await _adminService.GetRejectedUsersAsync();
 
-            return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
+            return Ok(ApiResponse<IEnumerable<RejectResponseDto>>
                 .SuccessResponse(users, "Rejected users retrieved successfully"));
         }
 
@@ -72,6 +72,14 @@ namespace LearnixCRM.API.Controllers
 
             return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
                 .SuccessResponse(users, "Pending users retrieved"));
+        }
+        [HttpGet("Approve")]
+        public async Task<IActionResult> GetApproveUsers()
+        {
+            var users = await _adminService.GetApproveUsersAsync();
+
+            return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
+                .SuccessResponse(users, "Approve users retrieved"));
         }
 
         [HttpGet("blocked")]
@@ -112,7 +120,7 @@ namespace LearnixCRM.API.Controllers
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var rejectUser = await _adminService.RejectUserAsync(dto.UserId, adminId, dto.RejectReason);
 
-            return Ok(ApiResponse<object>
+            return Ok(ApiResponse<RejectResponseDto>
                 .SuccessResponse(rejectUser, "User rejected successfully"));
         }
 

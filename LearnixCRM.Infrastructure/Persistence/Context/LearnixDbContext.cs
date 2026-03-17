@@ -13,6 +13,7 @@ namespace LearnixCRM.Infrastructure.Persistence.Context
         public DbSet<AssignUsers> AssignUsers => Set<AssignUsers>();
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<Team> Teams => Set<Team>();
 
         public DbSet<Lead> Leads => Set<Lead>();
 

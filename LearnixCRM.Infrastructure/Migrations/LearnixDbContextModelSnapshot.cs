@@ -22,7 +22,7 @@ namespace LearnixCRM.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("LearnixCRM.Domain.Entities.AssignUsers", b =>
+            modelBuilder.Entity("AssignUsers", b =>
                 {
                     b.Property<int>("AssignId")
                         .ValueGeneratedOnAdd()
@@ -46,10 +46,10 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ManagerUserId")
+                    b.Property<int>("SalesUserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("SalesUserId")
+                    b.Property<int>("TeamId")
                         .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -61,7 +61,7 @@ namespace LearnixCRM.Infrastructure.Migrations
 
                     b.HasKey("AssignId");
 
-                    b.HasIndex("ManagerUserId");
+                    b.HasIndex("TeamId");
 
                     b.HasIndex("SalesUserId", "IsActive")
                         .HasDatabaseName("IX_SalesUser_ActiveAssignment");
@@ -130,6 +130,9 @@ namespace LearnixCRM.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CourseId"));
 
+                    b.Property<int>("CourseDuration")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -147,11 +150,14 @@ namespace LearnixCRM.Infrastructure.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -402,6 +408,50 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("LearnixCRM.Domain.Entities.Team", b =>
+                {
+                    b.Property<int>("TeamId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeamId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ManagerUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TeamName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
+                    b.HasKey("TeamId");
+
+                    b.HasIndex("ManagerUserId");
+
+                    b.ToTable("Teams", (string)null);
+                });
+
             modelBuilder.Entity("LearnixCRM.Domain.Entities.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -492,11 +542,11 @@ namespace LearnixCRM.Infrastructure.Migrations
                         new
                         {
                             UserId = 1,
-                            CreatedAt = new DateTime(2026, 3, 3, 18, 39, 19, 287, DateTimeKind.Utc).AddTicks(7043),
+                            CreatedAt = new DateTime(2026, 3, 14, 9, 59, 32, 158, DateTimeKind.Utc).AddTicks(6911),
                             CreatedBy = 1,
                             Email = "admin@learnixcrm.com",
                             FullName = "Administrator",
-                            PasswordHash = "$2a$11$bPqBWrRwazYISFN4Z16Jp.cpkzlw1a2pbntFpC0RqyknxqflKlOLO",
+                            PasswordHash = "$2a$11$TJKMjsTP9uSeRKMaV4v13O0GOvNS9R0hNi7ZJTgRxqRm34/xkHLM2",
                             Status = 3,
                             UserRole = 1
                         });
@@ -612,23 +662,23 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.ToTable("Students", (string)null);
                 });
 
-            modelBuilder.Entity("LearnixCRM.Domain.Entities.AssignUsers", b =>
+            modelBuilder.Entity("AssignUsers", b =>
                 {
-                    b.HasOne("LearnixCRM.Domain.Entities.User", "ManagerUser")
-                        .WithMany()
-                        .HasForeignKey("ManagerUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("LearnixCRM.Domain.Entities.User", "SalesUser")
                         .WithMany()
                         .HasForeignKey("SalesUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ManagerUser");
+                    b.HasOne("LearnixCRM.Domain.Entities.Team", "Team")
+                        .WithMany("Members")
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("SalesUser");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("LearnixCRM.Domain.Entities.FollowUp", b =>
@@ -675,6 +725,17 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LearnixCRM.Domain.Entities.Team", b =>
+                {
+                    b.HasOne("LearnixCRM.Domain.Entities.User", "ManagerUser")
+                        .WithMany()
+                        .HasForeignKey("ManagerUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ManagerUser");
+                });
+
             modelBuilder.Entity("LearnixCRM.Domain.Entities.UserPasswordToken", b =>
                 {
                     b.HasOne("LearnixCRM.Domain.Entities.User", "User")
@@ -709,6 +770,11 @@ namespace LearnixCRM.Infrastructure.Migrations
                     b.Navigation("Histories");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("LearnixCRM.Domain.Entities.Team", b =>
+                {
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("LearnixCRM.Domain.Entities.User", b =>

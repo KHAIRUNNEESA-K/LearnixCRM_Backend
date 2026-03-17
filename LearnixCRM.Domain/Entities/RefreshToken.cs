@@ -14,7 +14,6 @@ namespace LearnixCRM.Domain.Entities
 
         public bool IsRevoked { get; private set; }
 
-
         public User User { get; private set; }
 
         protected RefreshToken() { }

@@ -29,6 +29,12 @@ namespace LearnixCRM.Infrastructure.Repositories
             );
             return result > 0;
         }
+        public async Task<bool> IsContactNumberRegisteredAsync(string contactNumber)
+        {
+            return await _dbContext.Users
+                .AnyAsync(u => u.ContactNumber == contactNumber
+                               && u.DeletedAt == null);
+        }
 
         public async Task CreateUserAsync(User user)
         {

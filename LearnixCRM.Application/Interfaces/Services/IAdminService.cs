@@ -15,11 +15,12 @@ namespace LearnixCRM.Application.Interfaces.Services
         Task<UserResponseDto> GetUserByIdAsync(int userId);
         Task<UserResponseDto> GetActiveUserByIdAsync(int userId);
         Task<IEnumerable<UserResponseDto>> GetInactiveUsersAsync();
-        Task<IEnumerable<RegisterUserResponseDto>> GetRejectedUsersAsync();
+        Task<IEnumerable<RejectResponseDto>> GetRejectedUsersAsync();
+        Task<IEnumerable<RegisterUserResponseDto>> GetApproveUsersAsync();
 
         Task<IEnumerable<RegisterUserResponseDto>> GetPendingUsersAsync();
         Task<RegisterUserResponseDto> ApproveUserAndSendTokenAsync(int userId, int adminId);
-        Task<RegisterUserResponseDto> RejectUserAsync(int userId, int adminId, string rejectReason);
+        Task<RejectResponseDto> RejectUserAsync(int userId, int adminId, string rejectReason);
         Task<UserResponseDto> BlockUserAsync(int userId, int adminId);
         Task UnblockUserAsync(int userId, int adminId);
         Task DeleteUserAsync(int userId, int adminId);

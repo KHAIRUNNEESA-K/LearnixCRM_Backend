@@ -11,11 +11,12 @@ namespace LearnixCRM.Application.Interfaces.Repositories
     public interface IAssignUsersRepository
     {
         Task<AssignUsers?> GetActiveBySalesUserIdAsync(int salesUserId);
-        Task<List<SalesUserDto>> GetSalesByManagerIdAsync(int managerUserId);
+        Task<List<SalesUserDto>> GetSalesByTeamIdAsync(int teamId);
         Task AddAsync(AssignUsers assignment);
         Task UpdateAsync(AssignUsers assignment);
         Task<AssignUsers?> GetByIdAsync(int id);
-        Task<bool> ManagerHasActiveSalesAsync(int managerUserId);
-        Task<List<AssignUsers>> GetActiveByManagerIdAsync(int managerUserId);
+        Task DeleteAsync(int id, int deletedBy);
+        Task<List<AssignUsers>> GetActiveByTeamIdAsync(int teamId);
+        Task DeactivateBySalesUserIdAsync(int salesUserId, int adminId);
     }
 }

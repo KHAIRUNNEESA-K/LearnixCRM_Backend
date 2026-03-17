@@ -60,23 +60,29 @@ namespace LearnixCRM.Application.Services
             rawToken = rawToken.Trim();
             var hash = UserPasswordToken.Hash(rawToken);
 
-            Console.WriteLine($"Incoming Raw Token: {rawToken}");
-            Console.WriteLine($"Generated Hash: {hash}");
-
             var token = await _tokenRepository.GetValidTokenAsync(hash);
 
             if (token == null)
-            {
-                Console.WriteLine("Token NOT found in DB");
-                throw new InvalidOperationException("Invalid or expired token");
-            }
-
-            Console.WriteLine($"DB TokenHash: {token.TokenHash}");
-            Console.WriteLine($"DB Expiry: {token.Expiry}");
-            Console.WriteLine($"DB IsUsed: {token.IsUsed}");
+                throw new InvalidOperationException("Invalid token");
 
             if (token.TokenType != expectedType)
                 throw new InvalidOperationException("Invalid token type");
+
+            if (token.IsUsed)
+                throw new InvalidOperationException("Token already used");
+
+            if (token.Expiry < DateTime.UtcNow)
+            {
+                var user = await _userRepository.GetByIdAsync(token.UserId);
+
+                if (user != null && user.Status == UserStatus.Approved)
+                {
+                    user.MarkInactive(user.UserId);
+                    await _userRepository.UpdateAsync(user);
+                }
+
+                throw new InvalidOperationException("Token expired. Please contact admin.");
+            }
 
             return token;
         }

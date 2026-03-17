@@ -13,6 +13,7 @@ namespace LearnixCRM.Infrastructure.Repositories
     public class StudentRepository :IStudentRepository
     {
         private readonly IDbConnection _db;
+
         public StudentRepository(IDbConnection db)
         {
             _db = db;
@@ -21,9 +22,10 @@ namespace LearnixCRM.Infrastructure.Repositories
         public async Task<IEnumerable<Student>> GetAllAsync()
         {
             return await _db.QueryAsync<Student>(
-                "sp_GetAllUsers",
+                "sp_GetAllStudents",
                 commandType: CommandType.StoredProcedure);
         }
+
         public async Task<Student?> GetByIdAsync(int id)
         {
             return await _db.QueryFirstOrDefaultAsync<Student>(
