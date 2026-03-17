@@ -4,9 +4,7 @@ using LearnixCRM.Application.DTOs.User;
 using LearnixCRM.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace LearnixCRM.API.Controllers
 {
@@ -39,6 +37,7 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<UserResponseDto>
                 .SuccessResponse(user, "User retrieved"));
         }
+
         [HttpGet("active")]
         public async Task<IActionResult> GetActiveUsers()
         {
@@ -47,6 +46,7 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<IEnumerable<UserResponseDto>>
                 .SuccessResponse(users, "Active users retrieved successfully"));
         }
+
         [HttpGet("inactive")]
         public async Task<IActionResult> GetInactiveUsers()
         {
@@ -61,7 +61,7 @@ namespace LearnixCRM.API.Controllers
         {
             var users = await _adminService.GetRejectedUsersAsync();
 
-            return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
+            return Ok(ApiResponse<IEnumerable<RejectResponseDto>>
                 .SuccessResponse(users, "Rejected users retrieved successfully"));
         }
 
@@ -73,6 +73,15 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
                 .SuccessResponse(users, "Pending users retrieved"));
         }
+        [HttpGet("Approve")]
+        public async Task<IActionResult> GetApproveUsers()
+        {
+            var users = await _adminService.GetApproveUsersAsync();
+
+            return Ok(ApiResponse<IEnumerable<RegisterUserResponseDto>>
+                .SuccessResponse(users, "Approve users retrieved"));
+        }
+
         [HttpGet("blocked")]
         public async Task<IActionResult> GetBlockedUsers()
         {
@@ -81,6 +90,7 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<IEnumerable<UserResponseDto>>
                 .SuccessResponse(users, "Blocked users retrieved"));
         }
+
         [HttpGet("active-users/{userId:int}")]
         public async Task<IActionResult> GetActiveUserById(int userId)
         {
@@ -110,7 +120,7 @@ namespace LearnixCRM.API.Controllers
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var rejectUser = await _adminService.RejectUserAsync(dto.UserId, adminId, dto.RejectReason);
 
-            return Ok(ApiResponse<object>
+            return Ok(ApiResponse<RejectResponseDto>
                 .SuccessResponse(rejectUser, "User rejected successfully"));
         }
 
@@ -145,6 +155,7 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<object>
                 .SuccessResponse(new { }, "User deleted successfully"));
         }
+
         [HttpGet("managers")]
         public async Task<IActionResult> GetActiveManagers()
         {
@@ -154,7 +165,6 @@ namespace LearnixCRM.API.Controllers
                 .SuccessResponse(result, "Active managers retrieved successfully"));
         }
 
-
         [HttpGet("sales-executives")]
         public async Task<IActionResult> GetActiveSalesExecutives()
         {
@@ -162,6 +172,7 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<IEnumerable<UserResponseDto>>
                 .SuccessResponse(result, "Active Sales executives retrieved successfully"));
         }
+
         [HttpPost("resend-set-password")]
         public async Task<IActionResult> ResendSetPassword(
           [FromBody] ForgotPasswordRequestDto dto)
@@ -185,8 +196,5 @@ namespace LearnixCRM.API.Controllers
             return Ok(ApiResponse<IEnumerable<UserResponseDto>>
                 .SuccessResponse(result, "Approved users pending password setup retrieved successfully"));
         }
-
-
-
     }
 }

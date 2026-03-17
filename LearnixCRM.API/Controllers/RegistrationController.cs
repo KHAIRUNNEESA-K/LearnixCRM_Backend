@@ -45,6 +45,5 @@ namespace LearnixCRM.API.Controllers
 
             return Ok(response);
         }
-
     }
 }

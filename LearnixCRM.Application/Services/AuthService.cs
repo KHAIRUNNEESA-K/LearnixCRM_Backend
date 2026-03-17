@@ -97,8 +97,5 @@ namespace LearnixCRM.Application.Auth.Services
 
             await _refreshTokenRepository.UpdateAsync(token);
         }
-
-
-
     }
 }

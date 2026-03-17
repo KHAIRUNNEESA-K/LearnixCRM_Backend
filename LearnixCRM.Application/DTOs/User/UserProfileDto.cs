@@ -18,5 +18,6 @@ namespace LearnixCRM.Application.DTOs.User
         public DateTime? DateOfJoining { get; set; }
         public UserRole UserRole { get; set; }
         public UserStatus Status { get; set; }
+       
     }
 }

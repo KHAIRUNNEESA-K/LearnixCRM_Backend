@@ -16,13 +16,15 @@ namespace LearnixCRM.Application.Services
         private readonly ISetPasswordRepository _tokenRepository;
         private readonly IAssignUsersRepository _assignmentRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ITeamRepository _teamRepository;
         public AdminService(
             IAdminRepository repository,
             IMapper mapper,
             IEmailService emailService,
             ISetPasswordRepository tokenRepository,
             IAssignUsersRepository assignmentRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ITeamRepository teamRepository)
         {
             _repository = repository;
             _mapper = mapper;
@@ -30,14 +32,15 @@ namespace LearnixCRM.Application.Services
             _tokenRepository=tokenRepository;
             _assignmentRepository=assignmentRepository;
             _userRepository=userRepository;
+            _teamRepository=teamRepository;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetAllUsersAsync()
         {
             var users = await _repository.GetAllUsersAsync();
-            if (users==null)
+            if (!users.Any())
             {
-                throw new Exception("No users Found");
+                throw new KeyNotFoundException("No users Found");
             }
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
@@ -59,14 +62,14 @@ namespace LearnixCRM.Application.Services
 
             return _mapper.Map<IEnumerable<UserResponseDto>>(users);
         }
-        public async Task<IEnumerable<RegisterUserResponseDto>> GetRejectedUsersAsync()
+        public async Task<IEnumerable<RejectResponseDto>> GetRejectedUsersAsync()
         {
             var users = await _repository.GetRejectedUserAsync();
 
             if (!users.Any())
                 throw new KeyNotFoundException("No Rejected users found");
 
-            return _mapper.Map<IEnumerable<RegisterUserResponseDto>>(users);
+            return _mapper.Map<IEnumerable<RejectResponseDto>>(users);
         }
 
         public async Task<UserResponseDto> GetUserByIdAsync(int userId)
@@ -97,6 +100,17 @@ namespace LearnixCRM.Application.Services
             if (!users.Any())
             {
                 throw new KeyNotFoundException("No pending users found");
+            }
+
+            return _mapper.Map<IEnumerable<RegisterUserResponseDto>>(users);
+        }
+        public async Task<IEnumerable<RegisterUserResponseDto>> GetApproveUsersAsync()
+        {
+            var users = await _repository.GetApproveUserAsync();
+
+            if (!users.Any())
+            {
+                throw new KeyNotFoundException("No Approve users found");
             }
 
             return _mapper.Map<IEnumerable<RegisterUserResponseDto>>(users);
@@ -151,7 +165,7 @@ namespace LearnixCRM.Application.Services
         }
 
 
-        public async Task<RegisterUserResponseDto> RejectUserAsync( int userId,int adminId, string rejectReason)
+        public async Task<RejectResponseDto> RejectUserAsync( int userId,int adminId, string rejectReason)
         {
             var user = await _repository.GetUserByIdAsync(userId);
             if(user ==null)
@@ -171,7 +185,7 @@ namespace LearnixCRM.Application.Services
 
             await _emailService.SendRejectionEmailAsync(user.Email, rejectReason);
 
-            return _mapper.Map<RegisterUserResponseDto>(user);
+            return _mapper.Map<RejectResponseDto>(user);
         }
 
         public async Task<UserResponseDto> BlockUserAsync(int userId, int adminId)
@@ -182,8 +196,7 @@ namespace LearnixCRM.Application.Services
 
             if (user.UserRole == UserRole.Manager)
             {
-                var hasTeam = await _assignmentRepository
-                    .ManagerHasActiveSalesAsync(userId);
+                var hasTeam = await _teamRepository.ManagerHasActiveTeamAsync(userId);
 
                 if (hasTeam)
                     throw new InvalidOperationException(
@@ -223,12 +236,12 @@ namespace LearnixCRM.Application.Services
 
             if (user.UserRole == UserRole.Manager)
             {
-                var hasActiveSales =
-                    await _assignmentRepository.ManagerHasActiveSalesAsync(userId);
+                var hasActiveTeam =
+                    await _teamRepository.ManagerHasActiveTeamAsync(userId);
 
-                if (hasActiveSales)
+                if (hasActiveTeam)
                     throw new InvalidOperationException(
-                        "Reassign sales before deleting manager.");
+                        "Manager has an active team. Reassign the team before deleting this manager.");
             }
 
             await _repository.DeleteUserAsync(userId, adminId);
@@ -242,15 +255,8 @@ namespace LearnixCRM.Application.Services
             {
                 throw new KeyNotFoundException("No active Managers found");
             }
+            return _mapper.Map<IEnumerable<UserResponseDto>>(managers);
 
-            return managers.Select(u => new UserResponseDto
-            {
-                UserId = u.UserId,
-                FullName = u.FullName,
-                Email = u.Email,
-                Role = (int)u.UserRole,
-                Status = (int)u.Status
-            });
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetActiveSalesExecutivesAsync()
@@ -313,9 +319,6 @@ namespace LearnixCRM.Application.Services
                 Status = (int)u.Status
             });
         }
-
-
-
 
     }
 }

@@ -26,8 +26,5 @@ namespace LearnixCRM.API.Controllers
                 "Password has been set successfully"
             ));
         }
-
-        
-
     }
 }

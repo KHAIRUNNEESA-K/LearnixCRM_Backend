@@ -28,6 +28,7 @@ namespace LearnixCRM.API.Controllers
                 " reset link has been sent"
             ));
         }
+
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] SetPasswordRequestDto dto)
         {
@@ -39,5 +40,4 @@ namespace LearnixCRM.API.Controllers
             ));
         }
     }
-
 }

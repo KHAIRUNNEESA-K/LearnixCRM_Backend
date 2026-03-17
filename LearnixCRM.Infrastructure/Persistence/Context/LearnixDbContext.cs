@@ -1,9 +1,8 @@
 ﻿using LearnixCRM.Domain.Entities;
-using LearnixCRM.Domain.Enum;
 using LearnixCRM.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 
-namespace LearnixCRM.Infrastructure.Persistence
+namespace LearnixCRM.Infrastructure.Persistence.Context
 {
     public class LearnixDbContext : DbContext
     {
@@ -14,6 +13,18 @@ namespace LearnixCRM.Infrastructure.Persistence
         public DbSet<AssignUsers> AssignUsers => Set<AssignUsers>();
 
         public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+        public DbSet<Team> Teams => Set<Team>();
+
+        public DbSet<Lead> Leads => Set<Lead>();
+
+        public DbSet<LeadHistory> LeadHistories => Set<LeadHistory>();
+
+        public DbSet<FollowUp> FollowUps => Set<FollowUp>();
+
+        public DbSet<Student> Students => Set<Student>();
+
+        public DbSet<Blacklist> Blacklists => Set<Blacklist>();
+        public DbSet<Course> Courses { get; set; }
 
         public LearnixDbContext(DbContextOptions<LearnixDbContext> options)
             : base(options)
@@ -23,7 +34,14 @@ namespace LearnixCRM.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+                        modelBuilder.Entity<Lead>()
+                .HasOne(l => l.Course)
+                .WithMany(c => c.Leads)
+                .HasForeignKey(l => l.CourseId)
+                .OnDelete(DeleteBehavior.Restrict);
+                        modelBuilder.Entity<Course>()
+                    .Property(c => c.Fee)
+                    .HasPrecision(18, 2);
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(LearnixDbContext).Assembly);
             modelBuilder.Entity<User>().HasQueryFilter(u => u.DeletedAt == null);
             modelBuilder.Entity<UserPasswordToken>().HasQueryFilter(upt => upt.DeletedAt == null);

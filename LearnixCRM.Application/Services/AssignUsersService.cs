@@ -4,70 +4,64 @@ using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Application.Interfaces.Services;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LearnixCRM.Application.Services
 {
     public class AssignUsersService : IAssignUsersService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ITeamRepository _teamRepository;
         private readonly IAssignUsersRepository _assignmentRepository;
 
         public AssignUsersService(
             IUserRepository userRepository,
+            ITeamRepository teamRepository,
             IAssignUsersRepository assignmentRepository)
         {
             _userRepository = userRepository;
+            _teamRepository = teamRepository;
             _assignmentRepository = assignmentRepository;
         }
 
-        public async Task<AssignSalesManagerResponseDto> AssignSalesToManagerAsync(AssignSalesManagerRequestDto dto,int adminId)
+        // Assign Sales to Team
+        public async Task<AssignSalesManagerResponseDto> AssignSalesToTeamAsync(
+            AssignSalesManagerRequestDto dto,
+            int adminId)
         {
             var salesUser = await _userRepository.GetByIdAsync(dto.SalesUserId)
                 ?? throw new KeyNotFoundException("Sales user not found");
 
             if (salesUser.UserRole != UserRole.Sales)
-                throw new InvalidOperationException("User is not a Sales role");
+                throw new InvalidOperationException("User is not Sales");
 
             if (salesUser.Status != UserStatus.Active)
                 throw new InvalidOperationException("Sales user must be Active");
 
-            var managerUser = await _userRepository.GetByIdAsync(dto.ManagerUserId)
-                ?? throw new KeyNotFoundException("Manager user not found");
+            var team = await _teamRepository.GetTeamByIdAsync(dto.TeamId)
+                ?? throw new KeyNotFoundException("Team not found");
 
-            if (managerUser.UserRole != UserRole.Manager)
-                throw new InvalidOperationException("User is not a Manager role");
+            if (!team.IsActive)
+                throw new InvalidOperationException("Team is inactive");
 
-            if (managerUser.Status != UserStatus.Active)
-                throw new InvalidOperationException("Manager must be Active");
+            var manager = await _userRepository.GetByIdAsync(team.ManagerUserId)
+                ?? throw new KeyNotFoundException("Manager not found");
 
             var existingAssignment =
                 await _assignmentRepository.GetActiveBySalesUserIdAsync(dto.SalesUserId);
 
-            if (existingAssignment != null &&
-                existingAssignment.ManagerUserId == dto.ManagerUserId)
-            {
-                throw new InvalidOperationException(
-                    "Sales user already assigned to this manager"
-                );
-            }
-
             if (existingAssignment != null)
             {
+                if (existingAssignment.TeamId == dto.TeamId)
+                    throw new InvalidOperationException("Sales already assigned to this team");
+
                 existingAssignment.Deactivate(adminId);
                 await _assignmentRepository.UpdateAsync(existingAssignment);
-
             }
 
             var assignment = AssignUsers.Create(
+                dto.TeamId,
                 dto.SalesUserId,
-                dto.ManagerUserId,
-                adminId
-            );
+                adminId);
 
             await _assignmentRepository.AddAsync(assignment);
 
@@ -76,13 +70,11 @@ namespace LearnixCRM.Application.Services
                 SalesUserId = salesUser.UserId,
                 SalesUserName = salesUser.FullName,
                 SalesUserEmail = salesUser.Email,
-
-                ManagerUserId = managerUser.UserId,
-                ManagerName = managerUser.FullName,
-                ManagerEmail = managerUser.Email
+                ManagerUserId = manager.UserId,
+                ManagerName = manager.FullName,
+                ManagerEmail = manager.Email
             };
         }
-
 
         public async Task<ManagerWithSalesResponseDto> GetManagerWithSalesAsync(int managerUserId)
         {
@@ -90,14 +82,23 @@ namespace LearnixCRM.Application.Services
                 ?? throw new KeyNotFoundException("Manager not found");
 
             if (manager.UserRole != UserRole.Manager)
-                throw new InvalidOperationException("User is not a Manager");
+                throw new InvalidOperationException("User is not Manager");
 
-            var salesUsers =
-                await _assignmentRepository.GetSalesByManagerIdAsync(managerUserId);
+            var teams = await _teamRepository.GetTeamsByManagerIdAsync(managerUserId);
 
-            if (salesUsers == null || !salesUsers.Any())
-                throw new InvalidOperationException("No sales users assigned to this manager");
+            if (teams == null || !teams.Any())
+                throw new InvalidOperationException("Manager has no teams");
 
+            var salesUsers = new List<SalesUserDto>();
+
+            foreach (var team in teams)
+            {
+                var teamSales =
+                    await _assignmentRepository.GetSalesByTeamIdAsync(team.TeamId);
+
+                if (teamSales != null && teamSales.Any())
+                    salesUsers.AddRange(teamSales);
+            }
 
             return new ManagerWithSalesResponseDto
             {
@@ -107,59 +108,51 @@ namespace LearnixCRM.Application.Services
             };
         }
 
-        public async Task<SalesWithManagerResponseDto> GetSalesWithManagerAsync(int salesUserId)
+        public async Task RemoveSalesFromTeamAsync(int assignmentId, int adminId)
+        {
+            var assignment = await _assignmentRepository.GetByIdAsync(assignmentId)
+                ?? throw new KeyNotFoundException("Assignment not found");
+
+            if (!assignment.IsActive)
+                throw new InvalidOperationException("Assignment already inactive");
+
+            assignment.Deactivate(adminId);
+
+            await _assignmentRepository.UpdateAsync(assignment);
+        }
+
+        public async Task<AssignSalesManagerResponseDto> ChangeSalesTeamAsync(
+     int salesUserId,
+     int newTeamId,
+     int adminId)
         {
             var salesUser = await _userRepository.GetByIdAsync(salesUserId)
                 ?? throw new KeyNotFoundException("Sales user not found");
 
-            if (salesUser.UserRole != UserRole.Sales)
-                throw new InvalidOperationException("User is not a Sales role");
+            var team = await _teamRepository.GetTeamByIdAsync(newTeamId)
+                ?? throw new KeyNotFoundException("Team not found");
+
+            if (!team.IsActive)
+                throw new InvalidOperationException("Team is inactive");
+
+            var manager = await _userRepository.GetByIdAsync(team.ManagerUserId)
+                ?? throw new KeyNotFoundException("Manager not found");
 
             var assignment =
                 await _assignmentRepository.GetActiveBySalesUserIdAsync(salesUserId)
-                ?? throw new InvalidOperationException("Sales user not assigned to any manager");
+                ?? throw new InvalidOperationException("Sales not assigned to any team");
 
-            var manager = await _userRepository.GetByIdAsync(assignment.ManagerUserId)
-                ?? throw new KeyNotFoundException("Manager not found");
+            if (assignment.TeamId == newTeamId)
+                throw new InvalidOperationException("Sales already in this team");
 
-            return new SalesWithManagerResponseDto
-            {
-                SalesUserId = salesUser.UserId,
-                SalesUserName = salesUser.FullName,
-                ManagerUserId = manager.UserId,
-                ManagerName = manager.FullName,
-                ManagerEmail = manager.Email
-            };
-        }
-        public async Task<AssignSalesManagerResponseDto> ChangeSalesManagerAsync(int salesUserId, int newManagerUserId, int adminId)
-        {
-            var salesUser = await _userRepository.GetByIdAsync(salesUserId)
-                ?? throw new KeyNotFoundException("Sales user not found");
+            assignment.Deactivate(adminId);
+            await _assignmentRepository.UpdateAsync(assignment);
 
-            if (salesUser.UserRole != UserRole.Sales)
-                throw new InvalidOperationException("User is not a Sales role");
+            var newAssignment = AssignUsers.Create(
+                newTeamId,
+                salesUserId,
+                adminId);
 
-            var newManager = await _userRepository.GetByIdAsync(newManagerUserId)
-                ?? throw new KeyNotFoundException("Manager not found");
-
-            if (newManager.UserRole != UserRole.Manager)
-                throw new InvalidOperationException("User is not a Manager");
-
-            if (salesUser.Status != UserStatus.Active)
-                throw new InvalidOperationException("Sales user must be Active");
-
-            if (newManager.Status != UserStatus.Active)
-                throw new InvalidOperationException("Manager must be Active");
-
-
-            var existingAssignment = await _assignmentRepository.GetActiveBySalesUserIdAsync(salesUserId);
-            if (existingAssignment != null)
-            {
-                existingAssignment.Deactivate(adminId);
-                await _assignmentRepository.UpdateAsync(existingAssignment);
-            }
-
-            var newAssignment = AssignUsers.Create(salesUserId, newManagerUserId, adminId);
             await _assignmentRepository.AddAsync(newAssignment);
 
             return new AssignSalesManagerResponseDto
@@ -167,86 +160,10 @@ namespace LearnixCRM.Application.Services
                 SalesUserId = salesUser.UserId,
                 SalesUserName = salesUser.FullName,
                 SalesUserEmail = salesUser.Email,
-
-                ManagerUserId = newManager.UserId,
-                ManagerName = newManager.FullName,
-                ManagerEmail = newManager.Email
+                ManagerUserId = manager.UserId,
+                ManagerName = manager.FullName,
+                ManagerEmail = manager.Email
             };
         }
-
-        public async Task DeleteAssignmentAsync(int assignmentId, int adminId)
-        {
-            var assignment = await _assignmentRepository.GetByIdAsync(assignmentId)
-                ?? throw new KeyNotFoundException("Assignment not found");
-
-            assignment.Deactivate(adminId);
-            await _assignmentRepository.UpdateAsync(assignment);
-            assignment.Delete(adminId);
-            await _assignmentRepository.UpdateAsync(assignment);
-
-        }
-        public async Task<ManagerWithSalesResponseDto> ReassignManagerTeamAsync(
-     int oldManagerUserId,
-     int newManagerUserId,
-     int adminId)
-        {
-            if (oldManagerUserId == newManagerUserId)
-                throw new InvalidOperationException("Both managers cannot be the same");
-
-            var oldManager = await _userRepository.GetByIdAsync(oldManagerUserId)
-                ?? throw new KeyNotFoundException("Old manager not found");
-
-            var newManager = await _userRepository.GetByIdAsync(newManagerUserId)
-                ?? throw new KeyNotFoundException("New manager not found");
-
-            if (oldManager.UserRole != UserRole.Manager ||
-                newManager.UserRole != UserRole.Manager)
-                throw new InvalidOperationException("Invalid manager role");
-
-            if (newManager.Status != UserStatus.Active)
-                throw new InvalidOperationException("New manager must be Active");
-
-            var teamAssignments =
-                await _assignmentRepository.GetActiveByManagerIdAsync(oldManagerUserId);
-
-            if (!teamAssignments.Any())
-                throw new InvalidOperationException("Old manager has no active sales team");
-
-            var reassignedSales = new List<SalesUserDto>();
-
-            foreach (var assignment in teamAssignments)
-            {
-                assignment.Deactivate(adminId);
-                await _assignmentRepository.UpdateAsync(assignment);
-
-                var newAssignment = AssignUsers.Create(
-                    assignment.SalesUserId,
-                    newManagerUserId,
-                    adminId);
-
-                await _assignmentRepository.AddAsync(newAssignment);
-
-                var salesUser = await _userRepository.GetByIdAsync(assignment.SalesUserId);
-
-                reassignedSales.Add(new SalesUserDto
-                {
-                    SalesUserId = salesUser.UserId,
-                    SalesUserName = salesUser.FullName,
-                    Email = salesUser.Email
-                });
-            }
-
-            return new ManagerWithSalesResponseDto
-            {
-                ManagerUserId = newManager.UserId,
-                ManagerName = newManager.FullName,
-                SalesUsers = reassignedSales
-            };
-        }
-
     }
-
-
 }
-
-

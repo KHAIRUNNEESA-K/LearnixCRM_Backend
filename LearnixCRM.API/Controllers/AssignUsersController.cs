@@ -1,7 +1,7 @@
 ﻿using LearnixCRM.Application.Common.Responses;
 using LearnixCRM.Application.DTOs.AssignUsers;
+using LearnixCRM.Application.DTOs.User;
 using LearnixCRM.Application.Interfaces.Services;
-using LearnixCRM.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,91 +9,67 @@ using System.Security.Claims;
 namespace LearnixCRM.API.Controllers
 {
     [ApiController]
-    [Route("api/admin/sales-manager")]
+    [Route("api/admin/team-sales")]
     [Authorize(Policy = "AdminOnly")]
     public class AssignUsersController : ControllerBase
     {
-        private readonly IAssignUsersService _salesManager;
+        private readonly IAssignUsersService _assignUsersService;
 
-        public AssignUsersController(IAssignUsersService salesManager)
+        public AssignUsersController(IAssignUsersService assignUsersService)
         {
-            _salesManager = salesManager;
+            _assignUsersService = assignUsersService;
         }
 
         [HttpPost("assign")]
-        public async Task<IActionResult> AssignSalesToManager([FromBody] AssignSalesManagerRequestDto dto)
+        public async Task<IActionResult> AssignSalesToTeam([FromBody] AssignSalesManagerRequestDto dto)
         {
-         
-                var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-                var result =
-                    await _salesManager.AssignSalesToManagerAsync(dto, adminId);
+            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-                return Ok(ApiResponse<AssignSalesManagerResponseDto>.SuccessResponse(
-                    result,
-                    "Sales user assigned to manager successfully"
-                ));
-            
+            var result = await _assignUsersService.AssignSalesToTeamAsync(dto, adminId);
+
+            return Ok(ApiResponse<AssignSalesManagerResponseDto>.SuccessResponse(
+                result,
+                "Sales user assigned to team successfully"
+            ));
         }
-
 
         [HttpGet("manager/{managerUserId}/sales")]
         public async Task<IActionResult> GetManagerWithSales(int managerUserId)
         {
-            var result = await _salesManager.GetManagerWithSalesAsync(managerUserId);
+            var result = await _assignUsersService.GetManagerWithSalesAsync(managerUserId);
 
             return Ok(ApiResponse<ManagerWithSalesResponseDto>.SuccessResponse(
                 result,
-                "Manager with sales fetched successfully"
+                "Manager sales fetched successfully"
             ));
         }
 
-        [HttpGet("sales/{salesUserId}/manager")]
-        public async Task<IActionResult> GetSalesWithManager(int salesUserId)
-        {
-            var result = await _salesManager.GetSalesWithManagerAsync(salesUserId);
-
-            return Ok(ApiResponse<SalesWithManagerResponseDto>.SuccessResponse(
-                result,
-                "Sales with manager fetched successfully"
-            ));
-        }
-
-        [HttpPut("reassign")]
-        public async Task<IActionResult> ReassignSalesToManager([FromBody] AssignSalesManagerRequestDto dto)
+        [HttpPut("change-team")]
+        public async Task<IActionResult> ChangeSalesTeam(
+    int salesUserId,
+    int newTeamId)
         {
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            var team = await _salesManager.ChangeSalesManagerAsync(
-                dto.SalesUserId,
-                dto.ManagerUserId,
+            var result = await _assignUsersService.ChangeSalesTeamAsync(
+                salesUserId,
+                newTeamId,
                 adminId);
 
-            return Ok(ApiResponse<AssignSalesManagerResponseDto>
-                .SuccessResponse(team, "Sales user reassigned successfully"));
+            return Ok(ApiResponse<AssignSalesManagerResponseDto>.SuccessResponse(
+                result,
+                "Sales moved to new team successfully"));
         }
-
-
-        [HttpDelete("assign/{assignId}")]
-        public async Task<IActionResult> DeleteAssignment(int assignId)
+        [HttpDelete("{assignmentId}")]
+        public async Task<IActionResult> RemoveSalesFromTeam(int assignmentId)
         {
             var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-            await _salesManager.DeleteAssignmentAsync(assignId, adminId);
+            await _assignUsersService.RemoveSalesFromTeamAsync(assignmentId, adminId);
 
-            return Ok(ApiResponse<object>.SuccessResponse(null, "Assignment deleted successfully"));
+            return Ok(ApiResponse<object>.SuccessResponse(
+                null,
+                "Sales removed from team successfully"));
         }
-        [HttpPut("reassign-team")]
-        public async Task<IActionResult> ReassignManagerTeam([FromBody] ReassignManagerDto dto)
-        {
-            var adminId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-            var newTeam = await _salesManager.ReassignManagerTeamAsync(dto.oldManagerUserId,dto.newManagerUserId,adminId);
-
-            return Ok(ApiResponse<ManagerWithSalesResponseDto>.SuccessResponse(
-                newTeam,
-                "Manager team reassigned successfully"));
-        }
-
-
     }
 }

@@ -2,7 +2,7 @@
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Domain.Enum;
-using LearnixCRM.Infrastructure.Persistence;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
@@ -51,6 +51,12 @@ namespace LearnixCRM.Infrastructure.Repositories
         {
             return await _db.QueryAsync<User>(
                 "sp_GetBlockedUsers",
+                commandType: CommandType.StoredProcedure);
+        }
+        public async Task<IEnumerable<User>> GetApproveUserAsync()
+        {
+            return await _db.QueryAsync<User>(
+                "sp_GetApproveUsers",
                 commandType: CommandType.StoredProcedure);
         }
         public async Task<IEnumerable<User>> GetRejectedUserAsync()

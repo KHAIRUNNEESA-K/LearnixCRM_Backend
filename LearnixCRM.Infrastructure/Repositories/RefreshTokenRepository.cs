@@ -1,7 +1,7 @@
 ﻿using Dapper;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Entities;
-using LearnixCRM.Infrastructure.Persistence;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 

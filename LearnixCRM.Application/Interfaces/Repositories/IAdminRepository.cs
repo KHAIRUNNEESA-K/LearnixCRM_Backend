@@ -11,6 +11,7 @@ namespace LearnixCRM.Application.Interfaces.Repositories
 
         Task<IEnumerable<User>> GetPendingUsersAsync();
         Task<User?> GetActiveUserByIdAsync(int userId);
+        Task<IEnumerable<User>> GetApproveUserAsync();
         Task<IEnumerable<User>> GetInactiveUserAsync();
         Task<IEnumerable<User>> GetRejectedUserAsync();
         Task<User?> GetUserByIdAsync(int userId);

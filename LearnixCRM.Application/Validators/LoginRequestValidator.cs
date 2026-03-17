@@ -24,3 +24,4 @@ namespace LearnixCRM.Application.Validators
         }
     }
 }
+

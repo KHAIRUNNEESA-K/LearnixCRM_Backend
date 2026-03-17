@@ -57,4 +57,3 @@ namespace LearnixCRM.Infrastructure.ExternalServices
         }
     }
 }
-

@@ -1,0 +1,13 @@
+﻿using LearnixCRM.Domain.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace LearnixCRM.Application.Interfaces.Services
+{
+    public interface IBlacklistService
+    {
+        Task<IEnumerable<Blacklist>> GetAllAsync();
+        Task<Blacklist?> GetByIdAsync(int id);
+        Task<Blacklist?> GetByEmailOrPhoneAsync(string email, string? phone);
+    }
+}

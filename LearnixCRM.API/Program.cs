@@ -3,6 +3,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using LearnixCRM.API.Middleware;
 using LearnixCRM.Application.Auth.Services;
+using LearnixCRM.Application.Interfaces;
 using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Application.Interfaces.Services;
 using LearnixCRM.Application.Mapping;
@@ -10,7 +11,7 @@ using LearnixCRM.Application.Services;
 using LearnixCRM.Application.Validators;
 using LearnixCRM.Infrastructure.Configuration;
 using LearnixCRM.Infrastructure.ExternalServices;
-using LearnixCRM.Infrastructure.Persistence;
+using LearnixCRM.Infrastructure.Persistence.Context;
 using LearnixCRM.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Data.SqlClient;
@@ -18,23 +19,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Data;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
-
 
 Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
- builder.Services.AddControllers()
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter()
-        );
-    });
-
-
+builder.Services.AddControllers()
+   .AddJsonOptions(options =>
+   {
+       options.JsonSerializerOptions.Converters.Add(
+           new JsonStringEnumConverter()
+       );
+   });
 
 builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddSwaggerGen(c =>
@@ -70,6 +67,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
@@ -83,41 +81,69 @@ builder.Services.AddScoped<IDbConnection>(_ =>
     new SqlConnection(
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(typeof(UserMappingProfile));
-builder.Services.AddAutoMapper(typeof(SetPasswordMappingProfile));
-builder.Services.AddAutoMapper(typeof(UserProfileMapping));
-builder.Services.AddAutoMapper(typeof(RegisterUserMappingProfile));
+builder.Services.AddAutoMapper(typeof(UserMappingProfile).Assembly);
 
+// ===== Repositories =====
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IRegistrationRepository, RegistrationRepository>();
-builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ISetPasswordRepository, SetPasswordRepository>();
-builder.Services.AddScoped<ISetPasswordService, SetPasswordService>();
-builder.Services.AddScoped<IResetPasswordService, ResetPasswordService>();
 builder.Services.AddScoped<IAssignUsersRepository, AssignUsersRepository>();
-builder.Services.AddScoped<IAssignUsersService, AssignUsersService>();
 builder.Services.AddScoped<IAssignedSalesRepository, AssignedSalesRepository>();
-builder.Services.AddScoped<IAssignedSalesService, AssignedSalesService>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<ISalesLeadRepository, SalesLeadRepository>();
+builder.Services.AddScoped<ISalesFollowUpRepository, SalesFollowUpRepository>();
+builder.Services.AddScoped<IBlacklistRepository, BlacklistRepository>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IAdminAdmissionRepository, AdminAdmissionRepository>();
+builder.Services.AddScoped<IAdminLeadRepository, AdminLeadRepository>();
+builder.Services.AddScoped<ILeadReportRepository, LeadReportRepository>();
+builder.Services.AddScoped<IAdmissionReportRepository, AdmissionReportRepsoitory>();
+builder.Services.AddScoped<IPerformanceReportRepository, PerformanceReportRepository>();
+builder.Services.AddScoped<ISalesAnalyticsRepository, SalesAnalyticsRepository>();
+builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
 
-builder.Services.AddHostedService<TokenCleanupService>();
 
-
+// ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtTokenGenerator, AuthTokenService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<ISetPasswordRepository, SetPasswordRepository>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 builder.Services.AddScoped<ISetPasswordService, SetPasswordService>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+builder.Services.AddScoped<IResetPasswordService, ResetPasswordService>();
+builder.Services.AddScoped<IAssignUsersService, AssignUsersService>();
+builder.Services.AddScoped<IAssignedSalesService, AssignedSalesService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+builder.Services.AddScoped<ISalesLeadService, SalesLeadService>();
+builder.Services.AddScoped<ISalesFollowUpService, SalesFollowUpService>();
+builder.Services.AddScoped<IBlacklistService, BlacklistService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
+builder.Services.AddScoped<ILeadImportService, LeadImportService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IAdminAdmissionRepository, AdminAdmissionRepository>();
+builder.Services.AddScoped<IAdminLeadService, AdminLeadService>();
+builder.Services.AddScoped<ILeadReportService, LeadReportService>();
+builder.Services.AddScoped<IAdmissionReportService,AdmissionReportService>();
+builder.Services.AddScoped<IPerformanceReportService,PerformanceReportService>();
+builder.Services.AddScoped<ISalesAnalyticsService, SalesAnalyticsService>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
+builder.Services.AddHttpContextAccessor();
+
+// ===== Hosted Services =====
+builder.Services.AddHostedService<TokenCleanupService>();
+
 builder.Services.Configure<SendGridSettings>(
     builder.Configuration.GetSection("SendGrid")
 );
-
 
 builder.Services.AddAuthorization(options =>
 {
@@ -133,8 +159,6 @@ builder.Services.AddAuthorization(options =>
 builder.Services.Configure<JwtSettings>(
     builder.Configuration.GetSection("JwtSettings")
 );
-
-builder.Configuration.AddEnvironmentVariables();
 
 var jwtSettings = builder.Configuration
     .GetSection("JwtSettings")
@@ -176,12 +200,19 @@ builder.Services.Configure<CloudinarySettings>(options =>
     options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")!;
     options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")!;
 });
-
-builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
-
-
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 if (app.Environment.IsDevelopment())
 {
