@@ -5,6 +5,10 @@ using LearnixCRM.Application.Interfaces.Repositories;
 using LearnixCRM.Domain.Constants;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Domain.Enum;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace LearnixCRM.Application.Services
@@ -13,14 +17,12 @@ namespace LearnixCRM.Application.Services
     {
         private readonly ISalesLeadRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IBlacklistRepository _blacklistRepository;
-        private readonly ICourseRepository _courseRepository;
-        public SalesLeadService(ISalesLeadRepository repository, IMapper mapper, IBlacklistRepository blacklistRepository,ICourseRepository courseRepository)
+        private readonly IAssignUsersRepository _assignUsersRepository;
+        public SalesLeadService(ISalesLeadRepository repository, IMapper mapper,IAssignUsersRepository assignUsersRepository)
         {
             _repository = repository;
             _mapper = mapper;
-            _blacklistRepository = blacklistRepository;
-            _courseRepository = courseRepository;
+            _assignUsersRepository = assignUsersRepository;
         }
 
         public async Task<IEnumerable<LeadResponseDto>> GetAllLeadsAsync()
@@ -55,25 +57,10 @@ namespace LearnixCRM.Application.Services
 
         public async Task<LeadResponseDto> AddLeadAsync(CreateLeadRequestDto dto, int salesUserId)
         {
-            
-            if (await _blacklistRepository.ExistsInBlacklistAsync(dto.Email, dto.Phone))
-            {
-                throw new InvalidOperationException("This lead is blacklisted.");
-            }
+            var assignment = await _assignUsersRepository.GetActiveBySalesUserIdAsync(salesUserId);
 
-            
-            var courseExists = await _courseRepository.ExistsAsync(dto.CourseId);
-            if (!courseExists)
-            {
-                throw new InvalidOperationException("Selected Course does not exist.");
-            }
-
-            
-            var leadExists = await _repository.ExistsByEmailOrPhoneAsync(dto.Email, dto.Phone);
-            if (leadExists)
-            {
-                throw new InvalidOperationException("Lead with this Email or Phone already exists.");
-            }
+            if (assignment == null || !assignment.IsActive)
+                throw new InvalidOperationException("Sales user must be assigned to an active team.");
 
             var lead = new Lead(
                 dto.FullName,
@@ -89,13 +76,15 @@ namespace LearnixCRM.Application.Services
 
             return _mapper.Map<LeadResponseDto>(lead);
         }
-
         public async Task<LeadResponseDto> UpdateLeadAsync(UpdateLeadRequestDto dto, int salesUserId)
         {
             var existing = await _repository.GetByIdAsync(dto.LeadId);
 
             if (existing == null)
                 throw new KeyNotFoundException($"Lead with ID {dto.LeadId} not found.");
+
+            if (existing.Status == LeadStatus.Converted)
+                throw new InvalidOperationException("Converted lead cannot be updated.");
 
             if (!string.IsNullOrWhiteSpace(dto.FullName) ||
                 !string.IsNullOrWhiteSpace(dto.Email) ||
@@ -115,19 +104,11 @@ namespace LearnixCRM.Application.Services
 
             if (dto.Status.HasValue)
             {
-                if ((int)dto.Status.Value < (int)existing.Status)
-                {
-                    throw new InvalidOperationException("Lead status cannot move backward.");
-                }
+                if (existing.Status == LeadStatus.Converted)
+                    throw new InvalidOperationException("Cannot change status of a converted lead.");
 
                 existing.UpdateStatus(dto.Status.Value, salesUserId);
             }
-
-            if (existing.Status == LeadStatus.Converted || existing.Status == LeadStatus.Lost)
-            {
-                throw new InvalidOperationException("Lead already closed and cannot be modified.");
-            }
-
 
             if (!string.IsNullOrWhiteSpace(dto.Remark))
             {
@@ -143,10 +124,11 @@ namespace LearnixCRM.Application.Services
                     return null;
                 }
 
-                if (remarkText.Contains(LeadRemarks.Converted.ToLower()))
+                if (remarkText.Contains(LeadRemarks.Converted.ToLower()) ||
+                    remarkText.Contains("enrolled"))
                 {
                     await MoveLeadToStudentAsync(existing, salesUserId);
-                    return null;
+                    return _mapper.Map<LeadResponseDto>(existing);
                 }
             }
 
@@ -164,6 +146,7 @@ namespace LearnixCRM.Application.Services
 
             await _repository.DeleteAsync(existing);
         }
+
         private async Task MoveLeadToBlacklistAsync(Lead lead, int userId)
         {
             var blacklist = new Blacklist(
@@ -186,7 +169,10 @@ namespace LearnixCRM.Application.Services
             );
 
             await _repository.AddStudentAsync(student);
-            await _repository.DeleteAsync(lead);
+
+            lead.UpdateStatus(LeadStatus.Converted, userId);
+
+            await _repository.UpdateAsync(lead);
         }
     }
 }

@@ -49,6 +49,15 @@ public class RegistrationService : IRegistrationService
         if (exists)
             throw new InvalidOperationException("Email already registered");
 
+        if (!string.IsNullOrWhiteSpace(dto.ContactNumber))
+        {
+            var contactExists = await _repository
+                .IsContactNumberRegisteredAsync(dto.ContactNumber);
+
+            if (contactExists)
+                throw new InvalidOperationException("Contact number already exists");
+        }
+
         var user = User.CreateSelfRegisteredUser(
          dto.Email,
          dto.FirstName,

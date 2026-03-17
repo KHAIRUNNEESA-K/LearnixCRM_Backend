@@ -15,7 +15,9 @@ namespace LearnixCRM.Application.DTOs.User
         public int Status { get; set; } = default!;
         public string ProfileImageUrl { get; set; }
         public string? EmployeeCode { get; private set; }
+        public string? RejectReason { get; set; }
         public DateTime? DateOfJoining { get; private set; }
         public string? ContactNumber { get; private set; }
+
     }
 }

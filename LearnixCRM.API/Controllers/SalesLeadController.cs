@@ -12,7 +12,6 @@ namespace LearnixCRM.API.Controllers
 {
     [ApiController]
     [Route("api/sales/leads")]
-    [Authorize(Policy = "SalesOnly")]
     public class SalesLeadController : ControllerBase
     {
         private readonly ISalesLeadService _service;

@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using LearnixCRM.Application.DTOs.Team;
 using LearnixCRM.Application.DTOs.User;
 using LearnixCRM.Application.Interfaces.Repositories;
 using System.Data;
@@ -23,7 +24,7 @@ namespace LearnixCRM.Infrastructure.Repositories
             );
         }
 
-        public async Task<SalesUserDto?> GetSalesByManagerAndSalesIdAsync(int managerUserId,int salesUserId)
+        public async Task<SalesUserDto?> GetSalesByManagerAndSalesIdAsync(int managerUserId, int salesUserId)
         {
             return await _db.QueryFirstOrDefaultAsync<SalesUserDto>(
                 "sp_Manager_GetAssignedSalesById",
@@ -36,5 +37,28 @@ namespace LearnixCRM.Infrastructure.Repositories
             );
         }
 
+        // NEW → Get manager teams
+        public async Task<IEnumerable<ManagerTeamDto>> GetTeamsByManagerAsync(int managerUserId)
+        {
+            return await _db.QueryAsync<ManagerTeamDto>(
+                "sp_Manager_GetTeams",
+                new { ManagerUserId = managerUserId },
+                commandType: CommandType.StoredProcedure
+            );
+        }
+
+        // NEW → Get team members
+        public async Task<IEnumerable<SalesUserDto>> GetTeamMembersAsync(int teamId, int managerUserId)
+        {
+            return await _db.QueryAsync<SalesUserDto>(
+                "sp_Manager_GetTeamMembers",
+                new
+                {
+                    TeamId = teamId,
+                    ManagerUserId = managerUserId
+                },
+                commandType: CommandType.StoredProcedure
+            );
+        }
     }
 }

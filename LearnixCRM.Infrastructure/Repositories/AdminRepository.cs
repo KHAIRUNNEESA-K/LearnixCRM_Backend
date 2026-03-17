@@ -53,6 +53,12 @@ namespace LearnixCRM.Infrastructure.Repositories
                 "sp_GetBlockedUsers",
                 commandType: CommandType.StoredProcedure);
         }
+        public async Task<IEnumerable<User>> GetApproveUserAsync()
+        {
+            return await _db.QueryAsync<User>(
+                "sp_GetApproveUsers",
+                commandType: CommandType.StoredProcedure);
+        }
         public async Task<IEnumerable<User>> GetRejectedUserAsync()
         {
             return await _db.QueryAsync<User>(

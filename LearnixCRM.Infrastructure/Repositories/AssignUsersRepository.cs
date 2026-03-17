@@ -6,7 +6,6 @@ using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-
 namespace LearnixCRM.Infrastructure.Repositories
 {
     public class AssignUsersRepository : IAssignUsersRepository
@@ -31,17 +30,16 @@ namespace LearnixCRM.Infrastructure.Repositories
             );
         }
 
-        public async Task<List<SalesUserDto>> GetSalesByManagerIdAsync(int managerUserId)
+        public async Task<List<SalesUserDto>> GetSalesByTeamIdAsync(int teamId)
         {
             var result = await _db.QueryAsync<SalesUserDto>(
-                "sp_GetSalesByManagerId",
-                new { ManagerUserId = managerUserId },
+                "sp_GetSalesByTeamId",
+                new { TeamId = teamId },
                 commandType: CommandType.StoredProcedure
             );
 
             return result.ToList();
         }
-
 
         public async Task AddAsync(AssignUsers assignment)
         {
@@ -64,32 +62,42 @@ namespace LearnixCRM.Infrastructure.Repositories
             );
         }
 
-        public async Task DeleteAsync(int id, int updatedBy)
+        public async Task DeleteAsync(int id, int deletedBy)
         {
             var assignment = await _context.AssignUsers
                 .FirstOrDefaultAsync(x => x.AssignId == id && x.DeletedAt == null);
 
             if (assignment != null)
             {
-                assignment.Deactivate(updatedBy);
+                assignment.Deactivate(deletedBy);
                 _context.AssignUsers.Update(assignment);
                 await _context.SaveChangesAsync();
             }
         }
-        public async Task<bool> ManagerHasActiveSalesAsync(int managerUserId)
-        {
-            return await _context.AssignUsers
-                .AnyAsync(x =>
-                    x.ManagerUserId == managerUserId &&
-                    x.IsActive);
-        }
 
-        public async Task<List<AssignUsers>> GetActiveByManagerIdAsync(int managerUserId)
+        public async Task<List<AssignUsers>> GetActiveByTeamIdAsync(int teamId)
         {
             return await _context.AssignUsers
-                .Where(x => x.ManagerUserId == managerUserId &&
-                            x.IsActive)
+                .Where(x =>
+                    x.TeamId == teamId &&
+                    x.IsActive &&
+                    x.DeletedAt == null)
                 .ToListAsync();
+        }
+        public async Task DeactivateBySalesUserIdAsync(int salesUserId, int adminId)
+        {
+            var assignment = await _context.AssignUsers
+                .FirstOrDefaultAsync(x =>
+                    x.SalesUserId == salesUserId &&
+                    x.IsActive &&
+                    x.DeletedAt == null);
+
+            if (assignment != null)
+            {
+                assignment.Deactivate(adminId);
+                _context.AssignUsers.Update(assignment);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
