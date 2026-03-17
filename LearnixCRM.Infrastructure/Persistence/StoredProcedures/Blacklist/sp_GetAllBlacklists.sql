@@ -12,7 +12,7 @@ BEGIN
         CreatedBy,
         CreatedAt
     FROM Blacklists
-    WHERE DeletedAt IS NULL  -- Only return active (not soft-deleted) entries
+    WHERE DeletedAt IS NULL 
     ORDER BY BlacklistedOn DESC;
 END
 GO

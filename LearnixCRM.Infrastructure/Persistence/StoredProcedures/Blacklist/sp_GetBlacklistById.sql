@@ -14,6 +14,6 @@ BEGIN
         CreatedAt
     FROM Blacklists
     WHERE BlacklistId = @BlacklistId
-      AND DeletedAt IS NULL;  -- Only return active entries
+      AND DeletedAt IS NULL;  
 END
 GO

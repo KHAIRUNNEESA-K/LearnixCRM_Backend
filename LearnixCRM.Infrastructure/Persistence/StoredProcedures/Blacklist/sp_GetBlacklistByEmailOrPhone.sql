@@ -5,7 +5,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Return blacklisted entry matching email or phone
+    
     SELECT 
         BlacklistId,
         Email,
@@ -15,7 +15,7 @@ BEGIN
         CreatedBy,
         CreatedAt
     FROM Blacklists
-    WHERE DeletedAt IS NULL  -- Only active entries
+    WHERE DeletedAt IS NULL  
       AND (
             (@Email IS NOT NULL AND Email = @Email)
          OR (@Phone IS NOT NULL AND Phone = @Phone)

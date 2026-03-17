@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace LearnixCRM.Application.DTOs.AssignUsers
 {
     public class AssignSalesManagerRequestDto
-    {
+   {
+        public int TeamId { get; set; }
         public int SalesUserId { get; set; }
-        public int ManagerUserId { get; set; }
     }
 }

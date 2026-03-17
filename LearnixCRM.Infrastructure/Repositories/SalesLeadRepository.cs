@@ -1,6 +1,7 @@
 ﻿namespace LearnixCRM.Infrastructure.Repositories
 {
     using Dapper;
+    using LearnixCRM.Application.DTOs.Lead;
     using LearnixCRM.Application.Interfaces;
     using LearnixCRM.Domain.Entities;
     using LearnixCRM.Domain.Enum;

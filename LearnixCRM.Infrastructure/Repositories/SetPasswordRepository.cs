@@ -57,14 +57,10 @@ namespace LearnixCRM.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<UserPasswordToken?> GetActiveTokenAsync(int userId, PasswordTokenType tokenType)
+        public async Task<UserPasswordToken?> GetTokenByHashAsync(string hash)
         {
             return await _context.UserPasswordTokens
-                .Where(t =>
-                    t.UserId == userId &&
-                    t.TokenType == tokenType &&
-                    !t.IsUsed &&
-                    t.Expiry > DateTime.UtcNow)
+                .Where(t => t.TokenHash == hash)
                 .OrderByDescending(t => t.CreatedAt)
                 .FirstOrDefaultAsync();
         }
@@ -83,6 +79,17 @@ namespace LearnixCRM.Infrastructure.Repositories
 
             _context.UserPasswordTokens.RemoveRange(tokens);
             await _context.SaveChangesAsync();
+        }
+        public async Task<UserPasswordToken?> GetActiveTokenAsync(int userId, PasswordTokenType tokenType)
+        {
+            return await _context.UserPasswordTokens
+                .Where(t =>
+                    t.UserId == userId &&
+                    t.TokenType == tokenType &&
+                    !t.IsUsed &&
+                    t.Expiry > DateTime.UtcNow)
+                .OrderByDescending(t => t.CreatedAt)
+                .FirstOrDefaultAsync();
         }
 
     }

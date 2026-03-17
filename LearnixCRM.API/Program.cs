@@ -98,6 +98,15 @@ builder.Services.AddScoped<ISalesFollowUpRepository, SalesFollowUpRepository>();
 builder.Services.AddScoped<IBlacklistRepository, BlacklistRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+builder.Services.AddScoped<ITeamRepository, TeamRepository>();
+builder.Services.AddScoped<IAdminAdmissionRepository, AdminAdmissionRepository>();
+builder.Services.AddScoped<IAdminLeadRepository, AdminLeadRepository>();
+builder.Services.AddScoped<ILeadReportRepository, LeadReportRepository>();
+builder.Services.AddScoped<IAdmissionReportRepository, AdmissionReportRepsoitory>();
+builder.Services.AddScoped<IPerformanceReportRepository, PerformanceReportRepository>();
+builder.Services.AddScoped<ISalesAnalyticsRepository, SalesAnalyticsRepository>();
+builder.Services.AddScoped<IAdminDashboardRepository, AdminDashboardRepository>();
+
 
 // ===== Services =====
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -118,7 +127,15 @@ builder.Services.AddScoped<IBlacklistService, BlacklistService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<IExcelTemplateService, ExcelTemplateService>();
 builder.Services.AddScoped<ILeadImportService, LeadImportService>();
-
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
+builder.Services.AddScoped<IAdminAdmissionRepository, AdminAdmissionRepository>();
+builder.Services.AddScoped<IAdminLeadService, AdminLeadService>();
+builder.Services.AddScoped<ILeadReportService, LeadReportService>();
+builder.Services.AddScoped<IAdmissionReportService,AdmissionReportService>();
+builder.Services.AddScoped<IPerformanceReportService,PerformanceReportService>();
+builder.Services.AddScoped<ISalesAnalyticsService, SalesAnalyticsService>();
+builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddHttpContextAccessor();
 
 // ===== Hosted Services =====
@@ -183,8 +200,19 @@ builder.Services.Configure<CloudinarySettings>(options =>
     options.ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY_API_KEY")!;
     options.ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY_API_SECRET")!;
 });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5173")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
 var app = builder.Build();
+
+app.UseCors("AllowFrontend");
 
 if (app.Environment.IsDevelopment())
 {

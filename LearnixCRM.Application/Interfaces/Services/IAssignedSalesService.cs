@@ -1,4 +1,5 @@
 ﻿using LearnixCRM.Application.DTOs.AssignUsers;
+using LearnixCRM.Application.DTOs.Team;
 using LearnixCRM.Application.DTOs.User;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,13 @@ namespace LearnixCRM.Application.Interfaces.Services
     public interface IAssignedSalesService
     {
         Task<ManagerWithSalesResponseDto> GetAllAssignedSalesAsync(int managerUserId);
-        Task<SalesUserDto> GetAssignedSalesByIdAsync(int managerUserId, int salesUserId);
-    }
 
+        Task<SalesUserDto> GetAssignedSalesByIdAsync(int managerUserId, int salesUserId);
+
+        Task<List<ManagerTeamDto>> GetManagerTeamsAsync(int managerUserId);
+
+        Task<ManagerTeamWithMembersDto> GetTeamMembersAsync(int managerUserId, int teamId);
+    }
 }
+
+

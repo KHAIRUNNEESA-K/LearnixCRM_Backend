@@ -10,13 +10,10 @@ namespace LearnixCRM.Application.Interfaces.Services
 {
     public interface IAssignUsersService
     {
-        Task<AssignSalesManagerResponseDto> AssignSalesToManagerAsync(AssignSalesManagerRequestDto dto, int adminId);
+        Task<AssignSalesManagerResponseDto> AssignSalesToTeamAsync(AssignSalesManagerRequestDto dto, int adminId);
         Task<ManagerWithSalesResponseDto> GetManagerWithSalesAsync(int managerUserId);
-        Task<SalesWithManagerResponseDto> GetSalesWithManagerAsync(int salesUserId);
-        Task<AssignSalesManagerResponseDto> ChangeSalesManagerAsync(int salesUserId, int newManagerUserId, int adminId);
-        Task DeleteAssignmentAsync(int assignmentId, int adminId);
-        Task<ManagerWithSalesResponseDto> ReassignManagerTeamAsync(int oldManagerUserId,int newManagerUserId, int adminId);
-
+        Task RemoveSalesFromTeamAsync(int assignmentId, int adminId);
+        Task<AssignSalesManagerResponseDto> ChangeSalesTeamAsync(int salesUserId,int newTeamId, int adminId);
 
     }
 }
