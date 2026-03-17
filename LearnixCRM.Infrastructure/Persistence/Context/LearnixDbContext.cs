@@ -46,6 +46,9 @@ namespace LearnixCRM.Infrastructure.Persistence.Context
             modelBuilder.Entity<UserPasswordToken>().HasQueryFilter(upt => upt.DeletedAt == null);
             modelBuilder.Entity<AssignUsers>().HasQueryFilter(s => s.DeletedAt == null);
             SeedData(modelBuilder);
+            modelBuilder.Entity<Blacklist>().HasQueryFilter(b => b.DeletedAt == null);
+
+            base.OnModelCreating(modelBuilder);
         }
 
         private void SeedData(ModelBuilder modelBuilder)

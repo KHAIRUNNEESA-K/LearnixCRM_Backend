@@ -118,9 +118,5 @@ namespace LearnixCRM.Infrastructure.Repositories
                 commandType: CommandType.StoredProcedure
             );
         }
-
-
-
     }
-
 }

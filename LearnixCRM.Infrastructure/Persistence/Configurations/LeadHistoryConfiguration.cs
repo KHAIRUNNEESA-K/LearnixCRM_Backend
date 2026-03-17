@@ -1,11 +1,6 @@
 ﻿using LearnixCRM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LearnixCRM.Infrastructure.Persistence.Configurations
 {
@@ -20,8 +15,6 @@ namespace LearnixCRM.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Action)
                 .HasMaxLength(50)
                 .IsRequired();
-
-           
 
             builder.Property(x => x.Source).HasConversion<int>();
 

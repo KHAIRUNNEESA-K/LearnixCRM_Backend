@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE sp_GetAllUsers
+﻿CREATE PROCEDURE sp_GetAllstudents
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -8,3 +8,4 @@ BEGIN
     FROM Students;
 END
 GO
+

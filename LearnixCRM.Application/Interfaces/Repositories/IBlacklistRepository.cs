@@ -9,5 +9,6 @@ namespace LearnixCRM.Application.Interfaces
         Task<IEnumerable<Blacklist>> GetAllAsync();
         Task<Blacklist?> GetByIdAsync(int id);
         Task<Blacklist?> GetByEmailOrPhoneAsync(string email, string? phone);
+        Task<bool> ExistsInBlacklistAsync(string email, string phone);
     }
 }

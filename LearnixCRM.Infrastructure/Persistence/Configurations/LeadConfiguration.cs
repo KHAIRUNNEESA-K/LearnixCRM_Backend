@@ -28,8 +28,6 @@ public class LeadConfiguration : IEntityTypeConfiguration<Lead>
 
         builder.Property(x => x.Source).HasConversion<int>();
 
-        
-
         builder.HasMany(x => x.FollowUps)
             .WithOne(x => x.Lead)
             .HasForeignKey(x => x.LeadId)

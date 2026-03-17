@@ -1,6 +1,7 @@
 ﻿namespace LearnixCRM.Infrastructure.Repositories
 {
     using Dapper;
+    using LearnixCRM.Application.DTOs.Lead;
     using LearnixCRM.Application.Interfaces;
     using LearnixCRM.Domain.Entities;
     using LearnixCRM.Domain.Enum;
@@ -32,9 +33,9 @@
             _currentUserId = int.Parse(userId!);
         }
 
-        public async Task<IEnumerable<Lead>> GetAllAsync()
+        public async Task<IEnumerable<LeadResponseDto>> GetAllAsync()
         {
-            return await _db.QueryAsync<Lead>(
+            return await _db.QueryAsync<LeadResponseDto>(
                 "sp_GetAllLeadsForSalesUser",
                 new { AssignedToUserId = _currentUserId },
                 commandType: CommandType.StoredProcedure);
@@ -97,6 +98,12 @@
             return await _context.Leads
                 .Select(x => x.Email)
                 .ToListAsync();
+        }
+
+        public async Task<bool> ExistsByEmailOrPhoneAsync(string email, string phone)
+        {
+            return await _context.Leads
+                .AnyAsync(x => x.Email == email || x.Phone == phone);
         }
     }
 }

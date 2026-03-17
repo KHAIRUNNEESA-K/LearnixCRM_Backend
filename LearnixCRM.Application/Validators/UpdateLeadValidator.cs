@@ -21,7 +21,15 @@ namespace LearnixCRM.Application.Validators.Lead
                 .WithMessage("Invalid email format")
                 .When(x => !string.IsNullOrWhiteSpace(x.Email));
 
-            
+            RuleFor(x => x.Phone)
+                .Matches(@"^[0-9]{10}$")
+                .WithMessage("Phone number must be 10 digits")
+                .When(x => !string.IsNullOrWhiteSpace(x.Phone));
+
+            RuleFor(x => x.CourseId)
+                .GreaterThan(0)
+                .WithMessage("CourseId must be greater than 0")
+                .When(x => x.CourseId.HasValue);
 
             RuleFor(x => x.Source)
                 .IsInEnum()
@@ -35,3 +43,4 @@ namespace LearnixCRM.Application.Validators.Lead
         }
     }
 }
+

@@ -10,6 +10,7 @@ namespace LearnixCRM.Application.Interfaces.Repositories
     public interface ICourseRepository
     {
         Task<List<Course>> GetAllAsync();
+        Task<bool> ExistsAsync(int courseId);
 
     }
 }

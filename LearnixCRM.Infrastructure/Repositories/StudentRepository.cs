@@ -21,7 +21,7 @@ namespace LearnixCRM.Infrastructure.Repositories
         public async Task<IEnumerable<Student>> GetAllAsync()
         {
             return await _db.QueryAsync<Student>(
-                "sp_GetAllUsers",
+                "sp_GetAllstudents",
                 commandType: CommandType.StoredProcedure);
         }
         public async Task<Student?> GetByIdAsync(int id)

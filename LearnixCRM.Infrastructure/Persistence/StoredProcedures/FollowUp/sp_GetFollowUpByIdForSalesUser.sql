@@ -15,3 +15,4 @@ BEGIN
       AND l.AssignedToUserId = @SalesUserId
       AND f.DeletedAt IS NULL
 END
+

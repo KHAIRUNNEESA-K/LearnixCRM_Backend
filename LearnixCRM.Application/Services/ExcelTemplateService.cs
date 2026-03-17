@@ -14,7 +14,7 @@ namespace LearnixCRM.Application.Services
             worksheet.Cell("A1").Value = "FullName";
             worksheet.Cell("B1").Value = "Email";
             worksheet.Cell("C1").Value = "Phone";
-            worksheet.Cell("D1").Value = "CourseId";
+            worksheet.Cell("D1").Value = "CourseName";
             worksheet.Cell("E1").Value = "Source";
 
             var headerRange = worksheet.Range("A1:E1");
@@ -33,16 +33,8 @@ namespace LearnixCRM.Application.Services
 
             // 🔹 Expand rows
             worksheet.Rows("2:1000").Height = 22;
-
-            // 🔹 Enable wrap text
             worksheet.Range("A2:E1000").Style.Alignment.WrapText = true;
-
-            // Unlock data area
             worksheet.Range("A2:E1000").Style.Protection.Locked = false;
-
-            // Lock header
-            worksheet.Range("A1:E1").Style.Protection.Locked = true;
-
             // Protect sheet
             worksheet.Protect();
 

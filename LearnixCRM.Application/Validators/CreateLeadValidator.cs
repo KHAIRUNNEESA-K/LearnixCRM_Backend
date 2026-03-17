@@ -15,9 +15,18 @@ namespace LearnixCRM.Application.Validators.Lead
                 .NotEmpty().WithMessage("Email is required")
                 .EmailAddress().WithMessage("Invalid email format");
 
+            RuleFor(x => x.Phone)
+                .NotEmpty().WithMessage("Phone number is required")
+                .Matches(@"^[0-9]{10}$")
+                .WithMessage("Phone number must be 10 digits");
+
+            RuleFor(x => x.CourseId)
+                .GreaterThan(0)
+                .WithMessage("CourseId must be greater than 0");
 
             RuleFor(x => x.Source)
-                .IsInEnum().WithMessage("Invalid lead source");
+                .IsInEnum()
+                .WithMessage("Invalid lead source");
         }
     }
 }

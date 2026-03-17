@@ -25,7 +25,11 @@ namespace LearnixCRM.Infrastructure.Repositories
                 .OrderBy(c => c.Name)
                 .ToListAsync();
         }
-
+        public async Task<bool> ExistsAsync(int courseId)
+        {
+            return await _context.Courses
+                .AnyAsync(x => x.CourseId == courseId);
+        }
 
     }
 }

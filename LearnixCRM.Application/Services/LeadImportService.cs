@@ -23,11 +23,14 @@ public class LeadImportService : ILeadImportService
     }
 
     public async Task<LeadImportResultDto> ImportLeadsAsync(
-    Stream stream,
-    int currentUserId)
+        Stream stream,
+        int currentUserId)
     {
         using var workbook = new XLWorkbook(stream);
-        var worksheet = workbook.Worksheet(1);
+        Console.WriteLine($"Stream Length: {stream.Length}");
+
+        // Always take first worksheet
+        var worksheet = workbook.Worksheets.First();
 
         var result = new LeadImportResultDto
         {
@@ -37,66 +40,66 @@ public class LeadImportService : ILeadImportService
             Errors = new List<string>()
         };
 
-        var lastRow = worksheet.LastRowUsed()?.RowNumber() ?? 1;
-
-        
-        if (lastRow < 1)
-        {
-            result.Errors.Add("Excel file contains no data rows.");
-            return result;
-        }
-
-        
         var existingEmails = await _repository.GetAllEmailsAsync();
         var emailSet = new HashSet<string>(existingEmails, StringComparer.OrdinalIgnoreCase);
 
-        for (int rowNumber = 2; rowNumber <= lastRow; rowNumber++)
+        var courses = await _courseRepository.GetAllAsync();
+        var courseDict = courses
+            .Where(c => c.IsActive)
+            .ToDictionary(c => c.Name.ToLower().Trim(), c => c.CourseId);
+
+        int rowNumber = 2;
+
+        while (true)
         {
             var row = worksheet.Row(rowNumber);
+
+            var fullName = row.Cell(1).GetString().Trim();
+            var email = row.Cell(2).GetString().Trim();
+            var phone = row.Cell(3).GetString().Trim();
+            var courseText = row.Cell(4).GetString().Trim();
+            var sourceText = row.Cell(5).GetString().Trim();
+
+            // Stop when completely empty row found
+            if (string.IsNullOrWhiteSpace(fullName) &&
+                string.IsNullOrWhiteSpace(email) &&
+                string.IsNullOrWhiteSpace(courseText))
+            {
+                break;
+            }
+
             result.Total++;
 
             try
             {
-                var fullName = row.Cell(1).GetString().Trim();
-                var email = row.Cell(2).GetString().Trim();
-                var phone = row.Cell(3).GetString().Trim();
-                var courseText = row.Cell(4).GetString().Trim();
-                var sourceText = row.Cell(5).GetString().Trim();
-
-                var courses = await _courseRepository.GetAllAsync();
-                var courseDict = courses
-                    .Where(c => c.IsActive)
-                    .ToDictionary(c => c.Name.ToLower(), c => c.CourseId);
-
-
                 if (string.IsNullOrWhiteSpace(fullName) ||
                     string.IsNullOrWhiteSpace(email))
                 {
                     result.Skipped++;
-                    result.Errors.Add($"Row {rowNumber}: FullName or Email is empty.");
+                    rowNumber++;
                     continue;
                 }
 
-                
                 if (emailSet.Contains(email))
                 {
                     result.Skipped++;
-                    result.Errors.Add($"Row {rowNumber}: Email already exists.");
+                    rowNumber++;
                     continue;
                 }
 
-
-                if (!courseDict.TryGetValue(courseText.ToLower(), out int courseId))
+                if (!courseDict.TryGetValue(courseText.ToLower().Trim(), out int courseId))
                 {
                     result.Skipped++;
                     result.Errors.Add($"Row {rowNumber}: Invalid Course '{courseText}'.");
+                    rowNumber++;
                     continue;
                 }
 
-                if (!Enum.TryParse(sourceText, true, out LeadSource source))
+                if (!Enum.TryParse(sourceText.Trim(), true, out LeadSource source))
                 {
                     result.Skipped++;
                     result.Errors.Add($"Row {rowNumber}: Invalid LeadSource '{sourceText}'.");
+                    rowNumber++;
                     continue;
                 }
 
@@ -112,9 +115,7 @@ public class LeadImportService : ILeadImportService
 
                 await _repository.AddAsync(lead);
 
-              
                 emailSet.Add(email);
-
                 result.Imported++;
             }
             catch (Exception ex)
@@ -122,9 +123,10 @@ public class LeadImportService : ILeadImportService
                 result.Skipped++;
                 result.Errors.Add($"Row {rowNumber}: {ex.Message}");
             }
+
+            rowNumber++;
         }
 
-        
         if (result.Imported == 0)
         {
             result.Errors.Add("All rows were skipped. No new leads imported.");
@@ -133,3 +135,5 @@ public class LeadImportService : ILeadImportService
         return result;
     }
 }
+
+

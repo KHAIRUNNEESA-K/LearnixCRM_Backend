@@ -30,7 +30,6 @@ public class Student : AuditableEntity
         Phone = lead.Phone;
         CourseId = lead.CourseId;
         JoinedDate = joinedDate;
-
         SetCreatedBy(createdBy);
     }
 }

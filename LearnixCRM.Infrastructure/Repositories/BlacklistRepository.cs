@@ -3,6 +3,7 @@ using LearnixCRM.Application.Interfaces;
 using LearnixCRM.Domain.Entities;
 using LearnixCRM.Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Data;
 using System.Security.Claims;
@@ -14,10 +15,12 @@ namespace LearnixCRM.Infrastructure.Repositories
     {
         private readonly IDbConnection _db;
         private readonly int _currentUserId;
+        private readonly LearnixDbContext _context;
 
-        public BlacklistRepository(IDbConnection db, IHttpContextAccessor accessor)
+        public BlacklistRepository(IDbConnection db, IHttpContextAccessor accessor,LearnixDbContext context)
         {
             _db = db;
+            _context = context;
 
             var userId = accessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             _currentUserId = int.Parse(userId!);
@@ -45,6 +48,17 @@ namespace LearnixCRM.Infrastructure.Repositories
                 "sp_GetBlacklistByEmailOrPhone",
                 new { Email = email, Phone = phone },
                 commandType: CommandType.StoredProcedure);
+        }
+        public async Task<bool> ExistsInBlacklistAsync(string? email, string? phone)
+        {
+            return await _context.Blacklists
+                .AnyAsync(x =>
+                    x.DeletedAt == null &&
+                    (
+                        (email != null && x.Email == email) ||
+                        (phone != null && x.Phone == phone)
+                    )
+                );
         }
     }
 }

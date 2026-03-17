@@ -13,9 +13,9 @@
 
             public string? Phone { get; private set; }
 
-        public int CourseId { get; private set; }
-        public Course Course { get; private set; } = null!;
-        public LeadSource Source { get; private set; }
+            public int CourseId { get; private set; }
+            public Course Course { get; private set; } = null!;
+            public LeadSource Source { get; private set; }
 
             public LeadStatus Status { get; private set; }
 
@@ -45,7 +45,7 @@
                 FullName = fullName;
                 Email = email.ToLowerInvariant();
                 Phone = phone;
-                 CourseId = courseId;
+                CourseId = courseId;
                 Source = source;
                 AssignedToUserId = assignedTo;
 
